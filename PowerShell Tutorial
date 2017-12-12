@@ -1,0 +1,490 @@
+Windows PowerShell is Microsoft's task automation framework, consisting of a command-line shell and associated scripting language built on top of .NET Framework. PowerShell provides full access to COM and WMI, enabling administrators to perform administrative tasks on both local and remote Windows systems.
+
+PowerShell is Microsoft new Command Line Interface for Windows systems, it provides access to:
+•	CMD-Command Prompt
+•	PowerShell Functions, Cmdlets(PowershellCommands)
+•	Access to the .NetFramework API
+•	Access to Windows Management Instrumentation
+•	Access to Windows Component Object Model (COM)
+
+Remember that PowerShell output is always a .NET object. That output could be a System.Diagnostics.Process a object or System.IO.FileInfo object or a System.String object. Basically it could be any .NET object whose assembly is loaded into PowerShell including your own .NET objects
+
+Basic Cmdlets
+1: Get-Command
+Get-Command to find all the commands that are available from PowerShell. This includes all your old console utilities, batch files, VBScript files, etc 
+2: Get-Help 
+The Get-Help cmdlet provides help on various topics including what a specified cmdlet does, what parameters it takes and usually includes examples of how to use the command.
+PS> Get-Help *
+PS E:\Users\smlcodes> get-help *
+
+Name                              Category  Module                    Synopsis
+----                              --------  ------                    --------
+ac                                Alias                               Add-Content
+asnp                              Alias                               Add-PSSnapin
+clc                               Alias                               Clear-Content
+cli                               Alias                               Clear-Item
+clp                               Alias                               Clear-ItemProperty
+clv                               Alias                               Clear-Variable
+compare                           Alias                               Compare-Object
+cpi                               Alias                               Copy-Item
+cpp                               Alias                               Copy-ItemProperty
+cvpa                              Alias                               Convert-Path
+dbp                               Alias                               Disable-PSBreakpoint
+diff                              Alias                               Compare-Object
+ebp                               Alias                               Enable-PSBreakpoint
+epal                              Alias                               Export-Alias
+epcsv                             Alias                               Export-Csv
+
+3.Powershell Pipelining 
+PowerShell is an Object based Shell, this means that everything is an object. Those who have programed in C#, VB, VB script or any other Objects based language know very well the power of objects.
+Object is Data and it has 2 types of components.
+•	Properties
+•	Method
+
+Selecting Objects
+PS c:\> Get-Service | Sort-Object
+PS E:\Users\smlcodes> Get-Service | Sort-Object
+
+Status   Name               DisplayName
+------   ----               -----------
+Running  AdobeARMservice    Adobe Acrobat Update Service
+Stopped  AeLookupSvc        Application Experience
+Stopped  ALG                Application Layer Gateway Service
+Running  AppHostSvc         Application Host Helper Service
+Stopped  AppIDSvc           Application Identity
+Running  Appinfo            Application Information
+
+Selecting Objects Filter-Select first 5 service
+PS c:\> Get-Service | Sort-Object | Select-Object -first 5
+PS E:\Users\smlcodes> Get-Service | Sort-Object | Select-Object -first 5
+
+Status   Name               DisplayName
+------   ----               -----------
+Running  AdobeARMservice    Adobe Acrobat Update Service
+Stopped  AeLookupSvc        Application Experience
+Stopped  ALG                Application Layer Gateway Service
+Running  AppHostSvc         Application Host Helper Service
+Stopped  AppIDSvc           Application Identity
+
+
+2.Powershell Basics
+What is Powershell Script?
+•	A PowerShell script is really nothing more than a simple text file. 
+•	File contains a series of PowerShell commands, with each command in a separate line. 
+•	Textfile filename should be with .PS1 extension
+
+Hello World Powershell
+
+#hello.ps1
+Write-host "Hello World!"
+
+Go to file path via Powershell command line & .\hello.ps1 to run the file
+PS E:\Users\smlcodes> cd E:\Users\smlcodes\Desktop\ps
+PS E:\Users\smlcodes\Desktop\ps> .\hello.ps1
+Hello World!
+
+or direct from command line powershell
+Write-Host " hello world !"
+
+PowerShell commands are called cmdlets (pronounced “commandlets”) and have the syntax verb-noun, e.g. Write-Host. Fortunately, most of the cmdlets have aliases corresponding to the commandsyou might know from DOS (cmd.exe) or Unix/Linux. In addition there is also a short PowerShell alias to most cmdlets. To find the cmdlet to a command you know from before you can use the cmdlet Get-Alias:
+•	Get-Alias ls # is there a cmdlet corresponding to Unix / Linux ls?
+•	Get-Alias # list all the aliases
+•	# use the DOS command findstr to list all lines containing Get-ChildItem
+•	Get-Alias | findstr Get-ChildItem
+•	# do the same thing but do it the PowerShell-way :
+•	Get-Alias | Where-Object {$_. Definition -eq " Get-ChildItem "}
+•	# dont worry about this unknown syntax for now , we will get to it soon
+
+1.variables
+
+Single Variables
+variables are instances of .NET objects, and these objects are also what is being passed through the pipe of piped commands (as opposed to just piping byte streams in other shells).
+#hello.ps1
+$firstname ="Satya"
+$lastname ="Kaveti"
+$fullname =" $firstname $lastname "
+
+write-host $firstname
+write-host $lastname
+write-host $fullname
+Write-Host " Hello $fullname , may I call you " `
+" $firstname `?"
+
+Output
+ PS E:\Users\smlcodes\Desktop\ps> .\hello.ps1
+Satya
+Kaveti
+ Satya Kaveti
+ Hello  Satya Kaveti  , may I call you   Satya ?
+
+You can list all current variables with Get-Variable $variable:*
+Scope for a variable can be defined with Set-Variable -Scope. PowerShell can also dot-source script files to make a script’s variables accessible from the command line.
+.#single-var.ps1 # dot-source it
+$firstname.GetType() # what kind of object is it?
+$firstname | Get-Member # Which methods and properties are available?
+
+
+Single and Double Quotes
+Variables are expanded/interpolated inside double quotes, but not inside single quotes.
+$name =" Satya "
+Write-Host Hello $name
+Write-Host " Hello $name "
+Write-Host 'Hello $name '
+
+Output
+---------------
+PS E:\Users\smlcodes\Desktop\ps> .\hello.ps1
+Hello  Satya
+ Hello  Satya
+Hello $name
+
+
+2.Arrays
+One-dimensional arrays
+Arrays are created with @(...)
+Note how we display the length of the array by viewing a property (Count) of the object. Btw, Count is just a reference to the Length property
+$os=@(" linux ", " windows ")
+$os +=@(" mac ")
+Write-Host $os[1] # print windows
+Write-Host $os # print array values
+Write-Host $os.Count # length of array
+
+#Output
+PS E:\Users\smlcodes\Desktop\ps> .\hello.ps1
+ windows
+ linux   windows   mac
+3
+
+If you want to access an array element within an interpolated string, you have to place the arrayelement in parentheses $($arry[i]);
+Write-Host "My operating system is $($os[1])"
+My operating system is  windows
+Associative Arrays (KEY, VALUE)
+Associative arrays are created with @{...} and are called Hashtables in PowerShell.
+$country =@{
+"INDIA" = "DELHI";
+"USA" = "NEWYORK"
+}
+$country +=@{"ENGLAND "=" LONDAON"}
+
+Write-Host $country["INDIA"] # print DELHI
+Write-Host @country # print array values
+Write-Host $country.Keys # print array keys
+Write-Host $country.Count # print length of array
+
+Output
+-------------------
+PS E:\Users\smlcodes\Desktop\ps> .\hello.ps1
+DELHI
+-USA: NEWYORK -INDIA: DELHI -ENGLAND:   LONDAON
+USA INDIA ENGLAND
+3
+
+
+3.Structures/Classes
+PowerShell is based on the object-oriented framework .NET, it will able to create and manipulates the objects.
+we can create the objects by using 
+New-Object psobject –Property@{
+---------------
+}
+
+# struct . ps1
+$myhost = New-Object psobject -Property @{os="";
+sw=@();
+user =@{}
+}
+$myhost.os=" linux "
+$myhost.sw +=@(" gcc "," flex "," vim ")
+$myhost. user +=@{
+" frodeh "=" Frode Haug ";
+" monicas "=" Monica Strand "
+}
+Write-Host $myhost.os
+Write-Host $myhost.sw[2]
+Write-Host $myhost.user[" monicas "]
+-----------------------------------------------------
+PS E:\Users\smlcodes\Desktop\ps> .\hello.ps1
+ linux
+ vim
+ Monica Strand
+
+See what kind of object this is by running the commands on the command line and doing
+$myhost
+$myhost.GetType()
+$myhost | Get-Member
+
+user                             os                                      sw
+----                            --                                      --
+{ frodeh ,  monicas }           linux                        { gcc ,  flex ,  vim }
+
+
+4. Commandline Arguments
+ $args variable which is a built-in variable that is auto-populated with an array of objects containing the values passed to the script.
+#.\hello.ps1 one two three four five
+Write-Host "Num Args:" $args.Length;
+foreach ($arg in $args)
+{
+  Write-Host "Arg: $arg";
+}
+
+------------------
+PS E:\Users\smlcodes\Desktop\ps> .\hello.ps1 one two three four five
+Num Args: 5
+Arg: one
+Arg: two
+Arg: three
+Arg: four
+Arg: five
+
+$MyInvocation	Contains an object with information about the current command, such as a script, function, or script block. You can use the information in the object, such as the path and file name of the script ($myinvocation.mycommand.path) or the name of a function , ($myinvocation.mycommand.name) to identify the current command. See also $PSScriptRoot
+
+
+
+5. Input
+We can read the input by using Read-Host
+
+1. Input from User
+$name = Read-Host "Waht is Your Name "
+Write-Host " you said your name is " $name
+
+------------
+PS E:\Users\smlcodes\Desktop\ps> .\hello.ps1
+Waht is Your Name : Satya
+ you said your name is  Satya
+
+
+2.Input from the Pipeline
+$input (another one of PowerShell’s builtin variables) is a special variable which enumerates the incoming objects in the pipeline.
+$something =" $input "
+Write-Host " you said " $something
+Write-Output " hey hey !" | .\hello.ps1
+
+3.Input from Files
+$file = Get-Content hello.ps1
+Write-Host @file - Separator "\n"
+
+4.Input from System Commands
+The Get-WmiObject cmdlet gets instances of Windows Management Instrumentation (WMI) classes or information about the available WMI classes
+$name =( Get-WmiObject Win32_OperatingSystem ).Name
+$kernel =( Get-WmiObject Win32_OperatingSystem ).Version
+Write-Host "I am running on $name , version `n $kernel in $( Get-Location )"
+
+-------
+PS E:\Users\smlcodes\Desktop\ps> .\hello.ps1
+I am running on Microsoft Windows Server 2012 R2 Datacenter|C:\Windows|\Device\Harddisk0\Partition2 , version
+ 6.3.9600 in E:\Users\smlcodes\Desktop\ps
+
+
+
+6. Operators
+
+1.Comparison Operators 
+•	lt 	-Less than
+•	gt 	-Greater than
+•	le 	-Less than or equal to
+•	ge 	-Greater than or equal to
+•	eq 	-Equal to
+•	ne 	-Not equal to
+
+2.Boolean
+•	-not 	-Not
+•	! 	-Not
+•	-and 	-And
+•	or 	-Or
+# if-num-string . ps1
+if ( $args . Count -ne 2) {
+Write-Host " usage :" `
+$MyInvocation . InvocationName `
+"<argument > <argument >"
+exit 0
+} elseif ( $args [0] -gt $args [1]) {
+Write-Host $args [0] " larger than " $args [1]
+} else {
+Write-Host $args [0] " smaller than or" `
+" equal to" $args [1]
+}
+if ( Test-Path $args [0]) {
+if (!( Get-Item $args [0]). PSIsContainer ) {
+Write-Host $args [0] "is a file "
+}
+}
+There are not separate comparison operators for numbers and strings. Be careful when comparing objects with different types. Behaviour might be a bit strange (see page 209 of ”Mastering
+PowerShell” by Weltner):
+$ 123 -lt "123.4"
+False
+$ 123 -lt "123.5"
+True
+A set of file test operators is not available since this functionality is covered through cmdlets (e.g.
+ 
+Boolean example
+# if-bool . ps1
+if ((1 -eq 2) - and (1 -eq 1) -or (1 -eq 1)) {
+Write-Host " And has precedence "
+} else {
+Write-Host "Or has precedence "
+}
+# force OR precedence :
+if ((1 -eq 2) - and ((1 -eq 1) -or (1 -eq 1))) {
+Write-Host " And has precedence "
+} else {
+Write-Host "Or has precedence "
+}
+AND is always (as known from mathematics courses) evaluated before OR (binds more tightly).Write it down in logic (truth table) if you are unsure.
+3.Switch/Case
+# switch . ps1
+$short = @{ yes ="y"; nope ="n" }
+$ans = Read-Host
+switch ( $ans ) {
+yes { Write-Host " yes " }
+nope { Write-Host " nope "; break }
+{ $short . ContainsKey (" $ans ")} `
+{ Write-Host $short [ $ans ] }
+default { Write-Host "$ans `??? "}
+}
+Run example and see the difference between inputting yes, nope and nei.In the example above {$short.ContainsKey("$ans")} checks if the content of $ans has an entry(matches a key) in the associative array $short. Switch in PowerShell continues testing each caseunless it reads a break.
+
+4.Where/Where-Object
+# where . ps1
+Get-ChildItem | Where-Object {$_. Length -gt 1KB}
+ 
+$_ represents the current object in the pipeline.In a pipeline we use Where-Object and ForEach-Object, but when processing a collection/array.in a script we would use Where and ForEach (in other words: without the -object).
+
+
+7.Iteration
+
+For loop
+# for . ps1
+for ($i =1; $i-le3 ;$i ++) {
+Write-Host "$i"
+}
+# something more useful :
+$file = Get-ChildItem
+for ($i =0; $i-lt$file . Count ;$i ++) {
+if (!( Get-Item $file [$i ]). PSIsContainer ) {
+Write-Host $file [$i ]. Name "is a file "
+} else {
+Write-Host $file [$i ]. Name "is a directory "
+}
+}
+Normally you would use ForEach instead of for since you can simplify the first loop above like
+this:
+ForEach ($i in 1..3) {
+Write-Host "$i"
+}
+
+While
+# while . ps1
+while ($i -le 3) {
+Write-Host $i
+$i ++
+}
+# something more useful :
+$file = Get-ChildItem
+$i =0
+while ($i -lt $file . Count ) {
+if (!( Get-Item $file [$i ]). PSIsContainer ) {
+Write-Host $file [$i ]. Name "is a file "
+} else {
+Write-Host $file [$i ]. Name "is a directory "
+}
+$i ++
+}
+The for example converted to while.
+
+Foreach loop
+# foreach . ps1
+foreach ($i in Get-ChildItem ) {
+Write-Host $i. Name
+}
+# with associative arrays
+$user =@{
+" frodeh " = " Frode Haug ";
+" monicas " = " Monica Strand ";
+" ivarm " = " Ivar Moe"
+}
+foreach ( $key in $user . Keys ) {
+Write-Host $user [ $key ]
+}
+In a pipeline we would use ForEach-Object.
+ForEach
+If we want to read from the pipeline and do stuff object by object:
+# foreach-pipe . ps1
+foreach ($i in $input ) {
+$foo += @($i)
+}
+Write-Host " size of foo is" $foo . Count
+or
+# foreach-object-pipe . ps1
+$input | ForEach-Object {
+$foo += @($_)
+}
+Write-Host " size of foo is" $foo . Count
+$ Get-ChildItem | ./ foreach-object-pipe . ps1
+size of foo is 20
+$input represents the pipeline and $_ the current object in the pipeline.
+
+8.Math Operators
+•	+ 	Add
+•	-	Subtract
+•	*	Multiply
+•	/ 	Divide
+•	% 	Modulus
+# math . ps1
+Write-Host " 3+5 is" (3+5)
+Write-Host "3+5 is" 3+5
+Write-Host "3+5 is" (3+5)
+Write-Host "3+5 is" $(3+5)
+Write-Host "3+5 is (3+5)"
+Write-Host "3+5 is $(3+5)"
+
+9.Functions
+# func . ps1
+# declare :
+function add($a , $b) {
+Write-Host "$a+$b is" ($a+$b)
+}#
+use :
+add 5.12 2.56
+
+
+10. RegExp
+ Special/Meta-characters:
+\ | ( ) [ ] { } ˆ $ * + ? .
+These have to be protected with \, e.g. http://www\.hig\.no
+To match c:ntemp, you need to use the regex c:nntemp. As a string in C++ source code,this regex becomes "c:nnnntemp". Four backslashes to match a single one indeed.
+(from http://www.regular-expressions.info/characters.html):There are many different regular expression engines, which differs mostly in features and speed.In this tutorial we will try to stick with simple examples which will the same in most engines (perl,pcre, extended posix, .NET, ...).
+1.	[abcd] 		-One of these characters
+2.	[ˆabcd] 	-Any one but these characters
+3.	[a-zA-Z0-9] 	-A character in these ranges
+
+Grouping:
+•	() Group
+•	| OR
+
+Anchoring:
+•	ˆ Beginning of line
+•	$ End of line
+ 
+Repetition operators/Modifiers/Quantifiers: 
+•	? 0 or 1 time
+•	0 or more times
+•	+ 1 or more times
+•	{N} N times
+•	{N,} At least N times
+•	{N,M} At least N but not more than M
+Demo: four step example with
+cat a.html | ForEach-Object {if($_ -match REGEXP)` {Write-Host $matches[0]}}
+PowerShell example
+# regexp . ps1
+$input | ForEach-Object {
+if ($_ - match
+"ˆ[ A-Za-z0-9 ._- ]+@([ A-Za-z0-9 .-]+) $") {
+Write-Host " Valid email ", $matches [0]
+Write-Host " Domain is", $matches [1]
+} else {
+Write-Host " Invalid email address !"
+}
+}
+When we use regular expressions inside scripts, it is very useful to be able to extract parts of the match. We can do this by specifying the part with (part) and refer to it later using $matches[1],$matches[2], etc. $matches[0] matches the entire expression.
+
+https://www.ansatt.hig.no/erikh/tutorial-powershell/powershell-notes.pdf
+
