@@ -1,10 +1,6 @@
-### Introduction
 
-As microservices and distributed applications quickly take over the development world - data integrity and security are more important than ever. A secure communication channel and limited data transfer between these loosely coupled systems are paramount. Most of the time, the end-user or service doesn't need to access the entirety of the data from a model, but only some specific parts.
 
-*Data Transfer Objects* (DTOs) are regularly applied in these applications. DTOs are just objects that hold the requested information of another object. Typically, the information is limited in scope. Since DTOs are a reflection of the original objects - *mappers* between these classes play a key role in the conversion process.
 
-In this article, we'll be diving into [MapStruct](https://mapstruct.org/) - an extensive mapper for Java Beans.
 
 ### MapStruct
 
@@ -1172,8 +1168,12 @@ The generated code from both mapper implementations will be the same.
 
 ### Conclusion
 
-In this article we explored MapStruct - a library for creating mapper classes, starting from basic level mappings to custom methods and custom mappers. We also looked into different options provided by MapStruct including dependency injection, data type mappings, enum mappings and using expressions.
 
-MapStruct provides a powerful integration plugin for reducing the amount of code a user has to write and makes the process of creating mappers easy and fast.
+Ref.
 
-The source code for the sample code can be found [here](https://github.com/TaimoorChoudhary/mapstruct).
+Covers All 
+https://stackabuse.com/guide-to-mapstruct-in-java-advanced-mapping-library/
+
+https://www.youtube.com/watch?v=ICl9gJ4o7Ec&ab_channel=Devoxx
+https://www.youtube.com/watch?v=vHIiKB4RL2Y&ab_channel=CodewithB
+
