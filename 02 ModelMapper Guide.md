@@ -334,3 +334,200 @@ Native Integrations
 Certain libraries natively integrate with ModelMapper without any additional dependencies. These include:
 
 -   [JDBI](http://modelmapper.org/user-manual/jdbi-integration)
+
+
+
+
+Spring Integration
+==================
+
+ModelMapper's Spring integration allows for the provisioning of destination objects to be delegated to a Spring BeanFactory during the mapping process.
+
+Setup
+-----
+
+To get started, add the `modelmapper-spring` Maven dependency to your project:
+
+```
+<dependency>
+  <groupId>org.modelmapper.extensions</groupId>
+  <artifactId>modelmapper-spring</artifactId>
+  <version>3.0.0</version>
+</dependency>
+
+```
+
+Usage
+-----
+
+Let's obtain a Spring integrated [Provider](http://modelmapper.org/user-manual/providers), which will delegate to a [BeanFactory](http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/BeanFactory.html) whenever called:
+
+```
+Provider<?> springProvider = SpringIntegration.fromSpring(beanFactory);
+
+```
+
+Then we can configure the Provider for to be used globally for a ModelMapper:
+
+```
+modelMapper.getConfiguration().setProvider(springProvider);
+
+```
+
+Or set the Provider to be used for a specific TypeMap:
+
+```
+typeMap.setProvider(springProvider);
+
+```
+
+The provider can also be used for individual mappings:
+
+```
+with(springProvider).map().someSetter(source.someGetter());
+```
+
+
+Jackson Integration
+===================
+
+ModelMapper's Jackson integration allows you to map a Jackson [JsonNode](http://jackson.codehaus.org/1.9.4/javadoc/org/codehaus/jackson/JsonNode.html) to a JavaBean.
+
+Setup
+-----
+
+To get started, add the `modelmapper-jackson` Maven dependency to your project:
+
+```
+<dependency>
+  <groupId>org.modelmapper.extensions</groupId>
+  <artifactId>modelmapper-jackson</artifactId>
+  <version>3.0.0</version>
+</dependency>
+
+```
+
+Next, configure ModelMapper to support the JsonNodeValueReader, which allows for values to be read and mapped from a [JsonNode](http://jackson.codehaus.org/1.9.4/javadoc/org/codehaus/jackson/JsonNode.html):
+
+```
+modelMapper.getConfiguration().addValueReader(new JsonNodeValueReader());
+
+```
+
+Usage Example
+-------------
+
+Consider the following JSON representing an order:
+
+```
+{
+  "id": 456,
+  "customer": {
+    "id": 789,
+    "street_address": "123 Main Street",
+    "address_city": "SF"
+  }
+}
+
+```
+
+We may need to map this to a different object model:
+
+```
+// Assume getters and setters are present
+
+public class Order {
+  private int id;
+  private Customer customer;
+}
+
+public class Customer {
+  private int id;
+  private Address address;
+}
+
+public class Address {
+  private String street;
+  private String city;
+}
+
+```
+
+Since the order JSON in this example uses an underscore naming convention, we'll need to configure ModelMapper to tokenize source property names by underscore:
+
+```
+modelMapper.getConfiguration().setSourceNameTokenizer(NameTokenizers.UNDERSCORE);
+
+```
+
+With that set, mapping a JsonNode for the order JSON to an Order object is simple:
+
+```
+JsonNode orderNode = new ObjectMapper().readTree(orderJson);
+Order order = modelMapper.map(orderNode, Order.class);
+
+```
+
+And we can assert that values are mapped as expected:
+
+```
+assertEquals(order.getId(), 456);
+assertEquals(order.getCustomer().getId(), 789);
+assertEquals(order.getCustomer().getAddress().getStreet(), "123 Main Street");
+assertEquals(order.getCustomer().getAddress().getCity(), "SF");
+
+```
+
+Explicit Mapping
+----------------
+
+While ModelMapper will do its best to **implicitly** match JsonNode values to destination properties, sometimes you may need to **explicitly** define how one property maps to another. A [PropertyMap](http://modelmapper.org/user-manual/property-mapping/) allows us to do this.
+
+Let's define how a `JsonNode` maps to an `Order` by creating a PropertyMap. Our PropertyMap will include a `map()` statement that maps a source JsonNode's `customer.street_address` field hierarchy to a destination Order's `getCustomer().getAddress().setStreet()` method hierarchy:
+
+```
+PropertyMap<JsonNode, Order> orderMap = new PropertyMap<JsonNode Order>() {
+  protected void configure() {
+    map().getCustomer().getAddress().setStreet(this.<String>source("customer.street_address"));
+  }
+};
+
+```
+
+To use our PropertyMap, we'll create a TypeMap for our order JsonNode and add our PropertyMap to it:
+
+```
+modelMapper.createTypeMap(orderNode, Order.class).addMappings(orderMap)
+
+```
+
+We can then map JsonNodes to Orders as usual, with properties being mapped according to the PropertyMap that we defined:
+
+```
+Order order = modelMapper.map(orderNode, Order.class);
+
+```
+
+Things to Note
+--------------
+
+ModelMapper maintains a [TypeMap](http://modelmapper.org/javadoc/org/modelmapper/TypeMap.html) for each source and destination type, containing the mappings between the two types. For "generic" types such as JsonNode this can be problematic since the structure of a JsonNode can vary. In order to distinguish structurally different JsonNodes that map to the same destination type, we can provide a *type map name* to ModelMapper.
+
+Continuing with the example above, let's map another order JSON, this one with a different structure, to the same Order class:
+
+```
+{
+  "id": 222,
+  "customer_id": 333,
+  "customer_street_address": "444 Main Street",
+  "customer_address_city": "LA"
+}
+
+```
+
+Mapping this JSON to an order is simple, but we'll need to provide a *type map name* to distinguish this JsonNode to Order mapping from the previous unnamed mapping:
+
+```
+JsonNode orderNode = new ObjectMapper().readTree(flatJson);
+Order order = modelMapper.map(orderNode, Order.class, "flat");
+```
