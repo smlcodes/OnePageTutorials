@@ -297,3 +297,40 @@ The ModelMapper API consists of a few principal types:
     -   Used in a [mapping](http://modelmapper.org/user-manual/property-mapping/#conditional-mapping).
 
 Also see the [Property Mapping](http://modelmapper.org/user-manual/property-mapping/) section of the User's Guide for an overview of the Mapping API.
+
+
+
+Integrations
+============
+
+ModelMapper was designed to be easily extensible via the [API](http://modelmapper.org/user-manual/api-overview/) and [SPI](http://modelmapper.org/user-manual/spi-overview/) and to integrate well with existing technologies. Several integrations are described below.
+
+General
+-------
+
+-   [OSGi](http://modelmapper.org/user-manual/osgi-integration/)
+
+Provider Integrations
+---------------------
+
+[Providers](http://modelmapper.org/user-manual/providers) allow you to provide you own instance of destination objects prior to mapping. ModelMapper has several 3rd party integrations that allow for external libraries to provide destination objects:
+
+-   [Spring](http://modelmapper.org/user-manual/spring-integration)
+-   [Guice](http://modelmapper.org/user-manual/guice-integration)
+-   [Dagger](http://modelmapper.org/user-manual/dagger-integration)
+
+Value Reader Integrations
+-------------------------
+
+Value Readers allow you to read and map values from different types of source object, aside from typical JavaBeans. ModelMapper has several 3rd party integrations that allow for the mapping of values from various types of source objects:
+
+-   [jOOQ](http://modelmapper.org/user-manual/jooq-integration)
+-   [Jackson](http://modelmapper.org/user-manual/jackson-integration)
+-   [Gson](http://modelmapper.org/user-manual/gson-integration)
+
+Native Integrations
+-------------------
+
+Certain libraries natively integrate with ModelMapper without any additional dependencies. These include:
+
+-   [JDBI](http://modelmapper.org/user-manual/jdbi-integration)
