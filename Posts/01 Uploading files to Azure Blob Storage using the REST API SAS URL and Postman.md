@@ -10,14 +10,13 @@ The first thing we need to do is to allow access to Postman to be able to upload
 We'll be making us of the Shared Access Signature or SAS Method of authorisation here.
 
 From your Storage Account page in the portal, click the "Shared access signature" menu item;
-
-[![](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-34-1024x498.png)](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-34.png)
+![image](https://user-images.githubusercontent.com/20472904/189115120-aba04427-4d78-4ca7-adf7-581d8de50ce1.png)
 
 Azure Portal -- Storage -- Shared Access Signature Menu Item
 
 From here we can create a new Shared Access Signature Key;
 
-[![](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-35-985x1024.png)](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-35.png)
+![image](https://user-images.githubusercontent.com/20472904/189115180-3223bcfd-382a-4a72-89de-93f5c0d3ea03.png)
 
 Azure Portal -- Storage -- Shared Access Signature Page
 
@@ -25,37 +24,39 @@ We want to give Postman enough privileges to be able to and and create blobs wit
 
 For "Allowed Services", deselect "Queue" and "Table" from the options, leaving "Blob" and "File" selected;
 
-[![](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-36.png)](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-36.png)
+![image](https://user-images.githubusercontent.com/20472904/189115464-fdf116f4-240d-40c5-b4f7-91bd78460148.png)
 
 Azure Portal -- Storage -- Shared Access Signature -- Allowed Services
 
-For "Allowed Resource Types", selected just "Object";
 
-[![](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-37.png)](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-37.png)
+
+For "Allowed Resource Types", selected just "Object";
 
 Azure Portal -- Storage -- Shared Access Signature -- Allowed Resource Types
 
+
 For "Allowed Permissions", select only "Write", "Add" and "Create";
 
-[![](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-38-1024x87.png)](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-38.png)
-
 Azure Portal -- Storage -- Shared Access Signature -- Allowed Permissions
+
 
 We can leave "Blob Versioning Permissions" and "Allowed Blog Index Permissions" at their default of selected for this example.
 
 For "Start and expiry date/time", I've chosen to set this SAS to be valid for one year by setting the expiry to be one year from the start date;
 
-[![](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-39-1024x142.png)](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-39.png)
-
 Azure Portal -- Storage -- Shared Access Signature -- Validity
 
 Leave the "IP addresses", "Allowed Protocols", "Preferred Routing Tier" and Signing Key at their defaults.
 
+
+
 We can now hit the blue "Generate SAS and Connection String" button to generate our authorization values;
 
-[![](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-40-1024x377.png)](https://www.petecodes.co.uk/wp-content/uploads/2021/09/image-40.png)
+![image](https://user-images.githubusercontent.com/20472904/189115718-15a4c5e0-8aae-4468-be42-bc21fe7f230e.png)
 
 Azure Portal -- Storage -- Shared Access Signature -- SAS and Connection Strings
+
+
 
 We'll be copying the "Blob service SAS URL", so hit the copy button to the right of that box;
 
