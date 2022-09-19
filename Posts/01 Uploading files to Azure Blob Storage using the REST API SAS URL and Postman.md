@@ -1,3 +1,22 @@
+---
+title: DevOps - Uploading files to Azure Blob Storage using the REST API SAS URL and Postman
+date: 2022-08-19 00:00:00 Z
+categories:
+- DevOps
+tags:
+- DevOps
+layout: article
+cover: /assets/logo/devops.png
+sharing: true
+license: false
+aside:
+  toc: true
+pageview: true
+---
+
+
+# Uploading files to Azure Blob Storage using the REST API
+
 There are a plethora of different ways to upload files to blob storage. One of the most convenient is to use the HTTP REST API provided.
 
 For this example, I'll be using Postman to complete the operation, but you could very easily use any other method capable of making HTTP requests.
