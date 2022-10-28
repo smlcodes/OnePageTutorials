@@ -1,0 +1,221 @@
+
+
+Hibernate Cache
+===================
+
+In Hibernate, Every fresh session having its own **cache memory**, **Caching is a mechanism
+for storing the loaded objects into a cache memory**.  
+
+The advantage of cache
+mechanism is, whenever again we want to load the same object from the database then instead of hitting the database once again, it loads from the local cache memory only, **so that the no. of round trips between an application and a database server got decreased**.  
+
+It means caching mechanism increases the performance of the application.  
+
+
+
+In hibernate we have two levels of caching
+
+1.  **First Level Cache** (Session Cache)
+
+2.  **Second Level Cache** (Session Factory Cache/ JVM Level Cache)
+
+
+<br>
+
+
+## 1.First Level Cache
+
+-   By default, for each hibernate application, **the first level cache is
+    automatically enabled. We can’t Enable/Disable first level cache**
+
+-   the first level cache is associated with the **session** object and
+    **scope** of the cache **is limited to one session only**
+
+-   When we load an object for the first time from the database then the object
+    will be loaded from the database and the loaded object will be stored in the
+    cache memory maintained by that session object
+
+-   If we load the same object once again, with in the same session, then the
+    object will be loaded from the local cache memory not from the database
+
+-   If we load the same object by opening other session, then again the object
+    will load from the database and the loaded object will be stored in the
+    cache memory maintained by this new session
+
+**Example:**
+```java
+Session session = factory.openSession();
+Object ob1 = session.get(Actor.class, new Integer(101)); //1
+ 
+Object ob2 = session.get(Actor.class, new Integer(101));//2
+Object ob3 = session.get(Actor.class, new Integer(101));//3
+session.close();//4
+ 
+Session ses2 = factory.openSession();
+Object ob5 = ses2.get(Actor.class, new Integer(101));//5
+```
+
+
+`1,` We are loaded object with id 101, now it will load the object from the
+database only as its the first time, and keeps this object in the session cache
+
+`2,3` i tried to load the same object 2 times, but here the object will be loaded
+from the stored cache only not from the database, as we are in the same session
+
+`4,` we close the first session, so the cache memory related this session also
+will be destroyed
+
+`5,` again i created one new session and loaded the same object with id 101, but
+this time hibernate will loads the object from the database
+
+if we want to remove the objects that are stored in the cache memory, then we
+need to call either `evict()` or clear() methods
+
+
+<br>
+
+## 2.Second Level Cache
+
+Whenever we are loading any object from the database, then hibernate verify
+whether that object is available in the local cache(**first level
+cache**) memory of that particular session, if not available then hibernate
+verify whether the object is available in global cache(**second level cache)**,
+if not available then hibernate will hit the database and loads the object from
+there, and then **first stores in the local cache** of the session , then in the
+global cache
+
+**SessionFactory** holds the second level cache data. It is global for all the
+session objects and not enabled by default.
+
+Different vendors have provided the implementation of Second Level Cache
+
+1.  **EH Cache**
+
+2.  **OS Cache**
+
+3.  **Swarm Cache**
+
+4.  **JBoss Cache**
+
+To enable second level cache in the hibernate, then the following **3** changes
+are required
+
+1.**Add provider class** in hibernate configuration file
+```java
+<property name="hibernate.cache.provider_class">
+    org.hibernate.cache.EhCacheProvider
+</property>
+```
+
+<br>
+
+2.**Configure cache element** for a class in hibernate mapping file
+```java
+<cache usage="read-only" />
+```
+
+
+-   **read-only:** caching will work for read only operation.
+
+-   **nonstrict-read-write:** caching will work for read and write but one at a
+    time.
+
+-   **read-write:** caching will work for read and write, can be used
+    simultaneously.
+
+-   **transactional:** caching will work for transaction.
+
+<br>
+
+3.create xml file called **ehcache.xml** and place where you have mapping and
+    configuration xml’s
+
+<br>
+
+
+**Example:**
+```java
+public class Employee {
+	private int eid;
+	private String name;
+	private String address;
+//Setters & Getteers
+}
+```
+
+
+Employee.hbm.xml
+```xml
+<hibernate-mapping package="cache">
+  <class name="Employee" table="employee">
+     <cache usage="read-only" />
+     <id name="eid" column="eid">
+     	<generator class="native"></generator>
+     </id>
+     <property name="name"></property>
+     <property name="address"></property>
+  </class>
+</hibernate-mapping>
+```
+
+
+ehcache.xml
+```xml
+<?xml version="1.0"?>
+<ehcache>
+	<defaultCache maxElementsInMemory="100" 
+	eternal="false"	timeToIdleSeconds="120" timeToLiveSeconds="200" />
+	
+	<cache name="cache.Employee" maxElementsInMemory="100"
+	eternal="false" timeToIdleSeconds="5" timeToLiveSeconds="200" />
+	
+</ehcache>  
+```
+
+
+hibernate.cfg.xml
+```xml
+<hibernate-configuration>
+  <session-factory>
+     <property> Driver Class, URL, Username, password, etc </property>
+     <property name="cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
+     <property name="hibernate.cache.use_second_level_cache">true</property>
+     <mapping resource="cache/employee.hbm.xml" /> 
+  </session-factory>
+</hibernate-configuration>
+```
+
+
+CacheDemo.java
+```java
+package cache;
+
+import org.hibernate.*;
+import org.hibernate.cfg.*;
+public class CacheDemo {
+
+ public static void main(String[] args) { 
+ 
+     //1.Load Configuration 
+     Configuration cfg = new Configuration();
+     cfg.configure("hibernate.cfg.xml");
+     
+     //2.Create Session
+     SessionFactory sf = cfg.buildSessionFactory();
+     Session session = sf.openSession(); 
+     
+     //3.Perform Operations
+     Object ob = session.load(Employee.class, new Integer(1));
+     Employee bo = (Employee) ob;
+     
+     System.out.println("SELECTED DATA\n ================");
+     System.out.println("SNO : "+bo.getEid());
+     System.out.println("NAME : "+bo.getName());
+     System.out.println("ADDRESS : "+bo.getAddress());
+ } 
+}
+```
+
+SpringBoot Cache
+===================
+
