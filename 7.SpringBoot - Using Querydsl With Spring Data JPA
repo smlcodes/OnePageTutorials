@@ -1,1 +1,3 @@
+Querydsl is a framework that enables the construction of statically typed SQL-like queries through its fluent API. Spring Data modules offer integration with Querydsl through `QuerydslPredicateExecutor`.
+
 
