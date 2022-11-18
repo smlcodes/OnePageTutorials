@@ -500,3 +500,41 @@ if (php_sapi_name() != "cli") {
 }
 
 ```
+
+
+
+Recently, I worked on a project where we’re dealing with the Google Drive API. We wanted to perform create and upload operations on Google Drive from our application. As I did some work with Drive API, I thought it’s better to write an article on it. In this article, I show you how to integrate Google Drive API with PHP. I am going to cover the following topics.
+
+Create a folder on Drive
+Upload file to Google Drive
+Download a file from Google Drive
+Delete a file from Drive
+To interact with the Drive API, you require to send the access token in each request. The access token needs to be created via Google OAuth. Google OAuth works only with the client ID and client secret. Let’s create these credentials in the next step.
+
+Register an Application and Create Credentials
+Go to the Google Developer Console.
+Create a new project. You can also select existing projects.
+Give a name to your project. Google console will generate a unique project ID for it.
+Your project will appear on top of the left sidebar.
+Click on Library and search for Google Drive API. Enable it.
+Click on the Credentials. Select Oauth Client id under Create credentials. Choose the radio button for Web Application.
+Give the Name. Under Authorized JavaScript origins enter your domain URL. In the Authorized redirect URIs add the link of the redirect URL. In my case I passed the URL http://localhost/drive-api/callback.php. I’ll create this file in a later part.
+Click on the Create button. You will get client ID and client secret in the pop-up. Copy these details. We will need it in a moment.
+drive-api-application
+Create a Database and DB Class(class-db.php)
+When we’ll run the OAuth flow, we should store the access token in the database table. The access token has an expiry time, so we’ll regenerate it in the background and update it in a table.
+
+To perform this process, I’ll create the class-db.php and write a code in it. But before that, create a google_oauth table in the database using the below SQL.
+
+1
+2
+3
+4
+5
+6
+CREATE TABLE `google_oauth` (
+ `id` int(11) NOT NULL AUTO_INCREMENT,
+ `provider` varchar(255) NOT NULL,
+ `provider_value` text NOT NULL,
+ PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
