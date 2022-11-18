@@ -501,9 +501,15 @@ if (php_sapi_name() != "cli") {
 
 ```
 
-
+# Google DRIVE PHP integration
 
 Recently, I worked on a project where we’re dealing with the Google Drive API. We wanted to perform create and upload operations on Google Drive from our application. As I did some work with Drive API, I thought it’s better to write an article on it. In this article, I show you how to integrate Google Drive API with PHP. I am going to cover the following topics.
+
+https://artisansweb.net/integrate-google-drive-api-with-php/
+
+https://github.com/fareed543/Uploading-files-to-Google-Drive-with-PHP
+
+
 
 Create a folder on Drive
 Upload file to Google Drive
@@ -526,12 +532,7 @@ When we’ll run the OAuth flow, we should store the access token in the databas
 
 To perform this process, I’ll create the class-db.php and write a code in it. But before that, create a google_oauth table in the database using the below SQL.
 
-1
-2
-3
-4
-5
-6
+
 CREATE TABLE `google_oauth` (
  `id` int(11) NOT NULL AUTO_INCREMENT,
  `provider` varchar(255) NOT NULL,
