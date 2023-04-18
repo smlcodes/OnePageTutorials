@@ -85,7 +85,7 @@ Once you run main method, strat method will call route & prints
 
   
   
-### Producer Consumer Example
+### 3. Producer Consumer Example
 ```java
     public static void producerConsumer() throws Exception {
         CamelContext context = new DefaultCamelContext();
@@ -107,7 +107,34 @@ Once you run main method, strat method will call route & prints
 
 ```
 
+
+
+### 4. Producer Consumer with Process
 ```java
+    public static void producerConsumerProcess() throws Exception {
+        CamelContext context = new DefaultCamelContext();
+
+        context.addRoutes(new RouteBuilder() {
+            public void configure() throws Exception {
+                from("direct:start").process(new Processor() {
+                    @Override
+                    public void process(Exchange exchange) throws Exception {
+                        String message = exchange.getIn().getBody(String.class);
+                        message = message + "-By Satya \n \n \n *************** \n \n \n";
+                        exchange.getOut().setBody(message);
+                    }
+                }).to("seda:end");
+            }
+        });
+        context.start();
+
+        ProducerTemplate producerTemplate = context.createProducerTemplate();
+        producerTemplate.sendBody("direct:start", "Hello Everyone");
+
+        ConsumerTemplate consumerTemplate = context.createConsumerTemplate();
+        String message = consumerTemplate.receiveBody("seda:end", String.class);
+        System.out.println(message);
+    }
 
 
 ```
