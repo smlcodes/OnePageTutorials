@@ -164,6 +164,8 @@ Once you run main method, strat method will call route & prints
 
 # SpringBoot + Apache Camel Integration
 
+I am going to create a rest controller class using camel Java DSL without using spring MVC. If we create a rest controller using camel’s route, we have to extend our rest controller class using **RouteBuilder**. Once we extend the rest controller from RouteBuilder we have to override **configure()** method. We define all our routes in the configuration method like below.
+
 ```
 
 ```
