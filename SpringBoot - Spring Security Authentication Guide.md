@@ -26,11 +26,13 @@ Basic Authentication is a simple authentication scheme that sends the user's cre
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
-    ```
+   ```
+   
 
 2.Create a new class and annotate it with `@Configuration` and `@EnableWebSecurity`. This will allow you to configure Spring Security for your application.
 
-3.Extend the `WebSecurityConfigurerAdapter` class and override the `configure(HttpSecurity http)` method to configure your security settings.  
+
+3.Extend the `WebSecurityConfigurerAdapter` class and override the `configure(HttpSecurity http)` method to configure your security settings.    
 
  ```java
  
