@@ -50,5 +50,4 @@ Basic Authentication is a simple authentication scheme that sends the user's cre
                 .httpBasic();
         }
     }
-    
-    ```
+  ```
