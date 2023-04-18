@@ -49,3 +49,8 @@ Basic Authentication is a simple authentication scheme that sends the user's cre
         }
     }
   ```
+  
+  
+  
+  # REF.
+  https://www.devglan.com/spring-security/spring-boot-security-rest-basic-authentication
