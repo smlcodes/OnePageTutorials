@@ -32,6 +32,66 @@ The routing engine in Camel is responsible for moving messages behind the hood. 
 The processor is a fundamental Camel notion that represents a node that can use, create, and alter an incoming exchange. Exchanges go from one processor to another during routing; as a result, you can think of a route as a graph with specialised processors as nodes and lines connecting one processor's output to another's input.
 
 
+# Apache Camel :: Hello World
+```java
+import org.apache.camel.CamelContext;
+import org.apache.camel.impl.DefaultCamelContext;
+
+public class ApacheCamelUtil {
+
+    public static void main(String[] args) throws Exception {
+        //1.Create CamelContext
+        CamelContext camelContext = new DefaultCamelContext();
+
+        //2.Create Routes by extending RouteBuilder 
+        camelContext.addRoutes(new ApacheCamelRoutes());
+                
+        //3.Start the CamelContext
+        camelContext.start();
+    }
+}
+```
+
+Create Routes by extending RouteBuilder 
+```java
+public class ApacheCamelRoutes extends RouteBuilder {
+    @Override
+    public void configure() throws Exception {
+        System.out.println(" Hello, Apache Camel");
+    }
+}
+```
+
+Once you run main method, strat method will call route & prints 
+`Hello, Apache Camel`
+
+```java
+
+
+```
+
+```java
+
+
+```
+
+```java
+
+
+```
+
+```java
+
+
+```
+
+
+
+
+
+
+
+
 
 # Ref.
 https://www.youtube.com/playlist?list=PLK0V_H0fCvPilK2_-WMwahm7HYB0XgJx7
