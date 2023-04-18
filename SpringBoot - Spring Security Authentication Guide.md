@@ -15,7 +15,8 @@ These are just some of the authentication types supported by Spring Boot. Depend
 
 # Basic Authentication
 
-Basic Authentication is a simple authentication scheme that sends the user's credentials in the header of each request. 
+Basic Authentication is a simple authentication scheme that sends the user's credentials in the header of each request.  
+
 Basic authentification is a standard HTTP header with the user and password encoded in base64 : `Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`.The userName and password is encoded in the format `username:password`. This is one of the simplest technique to protect the REST resources because it does not require cookies. session identifiers or any login pages.
 
 1.Add the Spring Security dependency to your project by adding the following code to your `pom.xml` file:  
@@ -32,24 +33,55 @@ Basic authentification is a standard HTTP header with the user and password enco
 
 
 3.Extend the `WebSecurityConfigurerAdapter` class and override the `configure(HttpSecurity http)` method to configure your security settings.    
+Here we want our every request to be authenticated using HTTP Basic authentication. If authentication fails, the configured **AuthenticationEntryPoint** will be used to retry the authentication process.
 
  ```java
  
-    @Configuration
-    @EnableWebSecurity
-    public class SecurityConfig extends WebSecurityConfigurerAdapter {
+@Configuration
+@EnableWebSecurity
+public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            http
-                .authorizeRequests()
-                    .antMatchers("/", "/home").permitAll()
-                    .anyRequest().authenticated()
-                    .and()
-                .httpBasic();
-        }
+    @Autowired
+    private AuthenticationEntryPoint authEntryPoint;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable().authorizeRequests()
+                .anyRequest().authenticated()
+                .and().httpBasic()
+                .authenticationEntryPoint(authEntryPoint);
     }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.inMemoryAuthentication().withUser("admin").password("admin").roles("USER");
+    }
+}
   ```
+  
+  
+  4.Now let us define our authentication entry point.This class will be responsible to send response when the credentials are no longer authorized. If the authentication event was successful, or authentication was not attempted because the HTTP header did not contain a supported authentication request, the filter chain will continue as normal. The only time the filter chain will be interrupted is if authentication fails and the AuthenticationEntryPoint is called.
+  ```java
+  public class AuthenticationEntryPoint extends BasicAuthenticationEntryPoint {
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authEx)
+            throws IOException {
+        response.addHeader("WWW-Authenticate", "Basic realm=" +getRealmName());
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        PrintWriter writer = response.getWriter();
+        writer.println("HTTP Status 401 - " + authEx.getMessage());
+    }
+
+    @Override
+    public void afterPropertiesSet()  {
+        setRealmName("DeveloperStack");
+        super.afterPropertiesSet();
+    }
+
+}
+  ```
+  
   
   
   
