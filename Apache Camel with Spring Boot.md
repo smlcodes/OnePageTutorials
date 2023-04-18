@@ -20,6 +20,7 @@ Apache Camel, we will be having 3 different components i.e **Route, Filter and P
 
 Some Important Camel Concepts
 -----------------------------
+<img width="666" alt="image" src="https://user-images.githubusercontent.com/20472904/232687794-dede6305-1db1-4fd2-9e39-ba2850898deb.png">
 
 **CamelContext**. 
 CamelContext is a type of container also We can think of it as Camels runtime system, which keeps everything together.
