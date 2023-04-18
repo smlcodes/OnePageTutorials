@@ -20,7 +20,9 @@ These are just some of the authentication types supported by Spring Boot. Depend
 Basic Authentication is a simple authentication scheme that sends the user's credentials in the header of each request. To implement Basic Authentication in Spring Boot, follow these steps:
 
 1.Add the Spring Security dependency to your project by adding the following code to your `pom.xml` file:
-    ```<dependency>
+   
+   ```
+    <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
