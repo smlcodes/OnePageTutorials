@@ -62,9 +62,9 @@ public class ApacheCamelRoutes extends RouteBuilder {
 Once you run main method, strat method will call route & prints 
 `Hello, Apache Camel`
 
-
   
-
+  
+  
 ### 2. FileCopy Example
 ```java
     public static void fileCopy() throws Exception {
@@ -83,8 +83,27 @@ Once you run main method, strat method will call route & prints
 
 ```
 
+  
+  
+### Producer Consumer Example
 ```java
+    public static void producerConsumer() throws Exception {
+        CamelContext context = new DefaultCamelContext();
 
+        context.addRoutes(new RouteBuilder() {
+            public void configure() throws Exception {
+                from("direct:start").to("seda:end");
+            }
+        });
+
+        ProducerTemplate producerTemplate = context.createProducerTemplate();
+        producerTemplate.sendBody("direct:start", "Hello Everyone");
+
+        ConsumerTemplate consumerTemplate = context.createConsumerTemplate();
+        String message = consumerTemplate.receiveBody("seda:end", String.class);
+        System.out.println(message);
+
+    }
 
 ```
 
