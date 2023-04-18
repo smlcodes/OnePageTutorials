@@ -62,8 +62,22 @@ public class ApacheCamelRoutes extends RouteBuilder {
 Once you run main method, strat method will call route & prints 
 `Hello, Apache Camel`
 
-```java
 
+## FileCopy Example
+```java
+    public static void fileCopy() throws Exception {
+        CamelContext context = new DefaultCamelContext();
+        context.addRoutes(new RouteBuilder() {
+            @Override
+            public void configure() throws Exception {
+                from("file:input_box?noop=true")
+                .to("file:output_box");
+            }
+        });
+
+        while (true)
+            context.start();
+    }
 
 ```
 
