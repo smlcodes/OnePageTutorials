@@ -82,7 +82,23 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 }
   ```
   
+ 5. After a succesdfull authentication, Spring updates the security context with an authentication object that contains credentials, roles, principal etc.
+
+ 6. Check API calls to validate Basic Authentication
+
   
+  Following logout implementation is one way to logout programatically.You can also configure logout in SpringSecurityConfig.java.You can use any one of them but not both.Once basic authentication is successfull, browser automatically sends basic auth header in every request following successfull authentication.Hence, if you are using this authentication mechanism in a browser based application, it is required to clear the Basic auth cache in the browser too after logout.
+  ```java
+  @RequestMapping(value="/logmeout", method = RequestMethod.POST)
+public String logoutPage (HttpServletRequest request, HttpServletResponse response) {
+Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+if (auth != null){
+new SecurityContextLogoutHandler().logout(request, response, auth);
+}
+return "redirect:/login";
+}
+  
+  ```
   
   
   # REF.
