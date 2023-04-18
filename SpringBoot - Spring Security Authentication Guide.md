@@ -15,7 +15,8 @@ These are just some of the authentication types supported by Spring Boot. Depend
 
 # Basic Authentication
 
-Basic Authentication is a simple authentication scheme that sends the user's credentials in the header of each request. To implement Basic Authentication in Spring Boot, follow these steps:
+Basic Authentication is a simple authentication scheme that sends the user's credentials in the header of each request. 
+Basic authentification is a standard HTTP header with the user and password encoded in base64 : `Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`.The userName and password is encoded in the format `username:password`. This is one of the simplest technique to protect the REST resources because it does not require cookies. session identifiers or any login pages.
 
 1.Add the Spring Security dependency to your project by adding the following code to your `pom.xml` file:  
    
