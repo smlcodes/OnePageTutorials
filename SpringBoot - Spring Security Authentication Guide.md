@@ -82,10 +82,13 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 }
   ```
   
- 5. After a succesdfull authentication, Spring updates the security context with an authentication object that contains credentials, roles, principal etc.
+ 5.After a succesdfull authentication, Spring updates the security context with an authentication object that contains credentials, roles, principal etc.
 
- 6. Check API calls to validate Basic Authentication. If we open in browser it will ask for credencisals. If you use postman
- 7. <img width="1095" alt="image" src="https://user-images.githubusercontent.com/20472904/232781385-6c57e140-8c0c-4b12-80c0-b783b9c03720.png">
+ 6.Check API calls to validate Basic Authentication. If we open in browser it will ask for credencisals. If you use postman
+ <img width="1095" alt="image" src="https://user-images.githubusercontent.com/20472904/232781385-6c57e140-8c0c-4b12-80c0-b783b9c03720.png">
+
+In that case we need pass creds 
+<img width="1095" alt="image" src="https://user-images.githubusercontent.com/20472904/232781928-331ad80e-4cc8-40f6-89ea-7651715c1184.png">
 
 
   
