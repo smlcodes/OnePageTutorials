@@ -166,45 +166,78 @@ Once you run main method, strat method will call route & prints
 
 I am going to create a rest controller class using camel Java DSL without using spring MVC. If we create a rest controller using camel’s route, we have to extend our rest controller class using **RouteBuilder**. Once we extend the rest controller from RouteBuilder we have to override **configure()** method. We define all our routes in the configuration method like below.
 
-```
+Model & Services related code found here https://github.com/smlcodes/SpringBootOnePageGuidesApp
+
+```java
+
+@Component
+public class CamelRoutes extends RouteBuilder {
+
+    private final Environment env;
+
+    public CamelRoutes(Environment env) {
+        this.env = env;
+    }
+
+    public void configure() throws Exception {
+
+        restConfiguration()
+                .contextPath("/camel/*")
+                .apiContextPath("/api-doc")
+                .apiProperty("api.title", "Spring Boot Camel Postgres Rest API.")
+                .apiProperty("api.version", "1.0")
+                .apiProperty("cors", "true")
+                .port(env.getProperty("server.port", "8080"))
+                .bindingMode(RestBindingMode.json);
+
+
+
+        rest("/camel")
+                .consumes(MediaType.APPLICATION_JSON_VALUE)
+                .produces(MediaType.APPLICATION_JSON_VALUE)
+                .get("/{id}").route()
+                .to("{{route.findById}}")
+                .endRest()
+                .get("/").route()
+                .to("{{route.findAll}}")
+                .endRest()
+                .post("/").route()
+                .marshal().json()
+                .unmarshal(getJacksonDataFormat(Book.class))
+                .to("{{route.saveUser}}")
+                .endRest()
+                .delete("/{id}")
+                .route()
+                .to("{{route.deleteUser}}")
+                .end();
+
+        from("{{route.findById}}")
+                .log("Received header : ${header.id}")
+                .bean(UserService.class, "findById(${header.id})");
+
+        from("{{route.findAll}}")
+                .bean(UserService.class, "findAll");
+
+
+        from("{{route.save}}")
+                .log("Received Body ${body}")
+                .bean(UserService.class, "saveUser(${body})");
+
+
+        from("{{route.deleteUser}}")
+                .log("Received header : ${header.id}")
+                .bean(UserService.class, "deleteUser(${header.id})");
+    }
+
+    private JacksonDataFormat getJacksonDataFormat(Class<?> unmarshalType) {
+        JacksonDataFormat format = new JacksonDataFormat();
+        format.setUnmarshalType(unmarshalType);
+        return format;
+    }
+}
+
 
 ```
-
-
-
-
-```
-
-```
-
-
-
-
-```
-
-```
-
-
-
-
-```
-
-```
-
-
-
-
-```
-
-```
-
-
-
-
-
-
-
-
 
 
 
