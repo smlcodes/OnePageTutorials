@@ -139,8 +139,25 @@ Once you run main method, strat method will call route & prints
 
 ```
 
-```java
 
+### 5. ActiveMQ consume message
+```java
+    public static void consumeMQmessage() throws Exception {
+        CamelContext context = new DefaultCamelContext();
+
+        ConnectionFactory connectionfactory = new ActiveMQConnectionFactory();
+        context.addComponent (" jms", JmsComponent.jmsComponentAutoAcknowledge(connectionfactory));
+        context.addRoutes(new RouteBuilder() {
+                    public void configure() throws Exception {
+                        from("activemq:queue:my_queue")
+                                .to("seda:end");
+                    }});
+         context.start();
+
+        ConsumerTemplate consumerTemplate = context.createConsumerTemplate();
+        String message = consumerTemplate.receiveBody("seda:end", String.class);
+        System.out.println(message);
+        }
 
 ```
 
