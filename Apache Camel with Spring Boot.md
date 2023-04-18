@@ -22,14 +22,11 @@ Some Important Camel Concepts
 -----------------------------
 <img width="666" alt="image" src="https://user-images.githubusercontent.com/20472904/232687794-dede6305-1db1-4fd2-9e39-ba2850898deb.png">
 
-**CamelContext**. 
-CamelContext is a type of container also We can think of it as Camels runtime system, which keeps everything together.
-
-**Routing Engine**
-The routing engine in Camel is responsible for moving messages behind the hood. And we should be aware that this exists and that it handles all of the heavy lifting, ensuring that messages are routed correctly.
-
-**Processor**
-The processor is a fundamental Camel notion that represents a node that can use, create, and alter an incoming exchange. Exchanges go from one processor to another during routing; as a result, you can think of a route as a graph with specialised processors as nodes and lines connecting one processor's output to another's input.
+-   **Message** contains data which is being transferred to a route. Each message has a unique identifier and it's constructed out of a body, headers, and attachments
+-   **Exchange** is the container of a message and it is created when a message is received by a consumer during the routing process. Exchange allows different types of interaction between systems -- it can define a one-way message or a request-response message
+-   **Endpoint** is a channel through which system can receive or send a message. It can refer to a web service URI, queue URI, file, email address, etc
+-   **Component** acts as an endpoint factory. To put it simply, components offer an interface to different technologies using the same approach and syntax. Camel already supports [a lot of components](http://camel.apache.org/components.html) in its DSLs for almost every possible technology, but it also gives the ability for writing custom components
+-   **Processor** is a simple Java interface which is used to add custom integration logic to a route. It contains a single *process* method used to preform custom business logic on a message received by a consumer
 
 
 # Apache Camel :: Hello World
