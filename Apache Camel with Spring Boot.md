@@ -21,19 +21,13 @@ Apache Camel, we will be having 3 different components i.e **Route, Filter and P
 Some Important Camel Concepts
 -----------------------------
 
-CamelContext
-------------
-
+**CamelContext**. 
 CamelContext is a type of container also We can think of it as Camels runtime system, which keeps everything together.
 
-Routing Engine
---------------
-
+**Routing Engine**
 The routing engine in Camel is responsible for moving messages behind the hood. And we should be aware that this exists and that it handles all of the heavy lifting, ensuring that messages are routed correctly.
 
-Processor
----------
-
+**Processor**
 The processor is a fundamental Camel notion that represents a node that can use, create, and alter an incoming exchange. Exchanges go from one processor to another during routing; as a result, you can think of a route as a graph with specialised processors as nodes and lines connecting one processor's output to another's input.
 
 
