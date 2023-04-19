@@ -36,7 +36,7 @@ The AuthenticationFilter will use a AuthenticationSuccessHandler and stores that
 
 
 
-#### SecurityContext VS JSESSIONID
+### SecurityContext VS JSESSIONID
 
    For the first time the authentication happens, the JSESSIONID is created & stores inside of the SecurityContext as JSessionID as key & all the authentication information as value.
 
@@ -50,7 +50,7 @@ The AuthenticationFilter will use a AuthenticationSuccessHandler and stores that
 
 
 
-# Basic Authentication
+# 1.Basic Authentication
 
 Basic Authentication is a simple authentication scheme that sends the user's credentials in the header of each request.  
 
@@ -253,7 +253,7 @@ Output
 
  <br>
 
-# Basic Authentication - with Database & UserDetailsService
+# 2.Basic Authentication - with Database & UserDetailsService
 
 A default implementation of the *AuthenticationProvider* uses the default implementations provided for the *UserDetailsService* and the *PasswordEncoder*.
 
