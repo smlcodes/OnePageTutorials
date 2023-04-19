@@ -55,92 +55,106 @@ Basic Authentication is a simple authentication scheme that sends the user's cre
 
 Basic authentification is a standard HTTP header with the user and password encoded in base64 : `Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`.The userName and password is encoded in the format `username:password`. This is one of the simplest technique to protect the REST resources because it does not require cookies. session identifiers or any login pages.
 
-1.Add the Spring Security dependency to your project by adding the following code to your `pom.xml` file:  
-   
-   ```xml
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-security</artifactId>
-    </dependency>
-   ```
-   
+**1. Maven Dependency**
+The simplest way to add all required jars is to add the *latest version of [spring-boot-starter-security](https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security)* dependency.
 
-2.Create a new class and annotate it with `@Configuration` and `@EnableWebSecurity`. This will allow you to configure Spring Security for your application.
+```
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+```
 
 
-3.Extend the `WebSecurityConfigurerAdapter` class and override the `configure(HttpSecurity http)` method to configure your security settings.    
-Here we want our every request to be authenticated using HTTP Basic authentication. If authentication fails, the configured **AuthenticationEntryPoint** will be used to retry the authentication process.
+**2. Configure Spring Security**. 
+2\. Configure Spring Security
+To enable authentication and authorization support, we can configure the utility class *WebSecurityConfigurerAdapter* (*deprecated*). It helps in requiring the user to be authenticated prior to accessing any configured URL (or all URLs) within our application.
 
- ```java
- 
+In the following configuration, we are using *httpBasic()* which enables basic authentication. We are also configuring the in-memory authentication manager to supply a username and password.
+
+SecurityConfig.java // DEPRECATED 2.7.0
+```
 @Configuration
 @EnableWebSecurity
-public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
+public class SecurityConfig extends WebSecurityConfigurerAdapter
+{
+    @Override
+    protected void configure(HttpSecurity http) throws Exception
+    {
+        http
+         .csrf().disable()
+         .authorizeRequests().anyRequest().authenticated()
+         .and()
+         .httpBasic();
+    }
 
     @Autowired
-    private AuthenticationEntryPoint authEntryPoint;
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable().authorizeRequests()
-                .anyRequest().authenticated()
-                .and().httpBasic()
-                .authenticationEntryPoint(authEntryPoint);
+    public void configureGlobal(AuthenticationManagerBuilder auth)
+            throws Exception
+    {
+        auth.inMemoryAuthentication()
+        	.withUser("admin")
+        	.password("{noop}password")
+        	.roles("ROLE_USER");
     }
+}
+```
 
+Starting Spring Boot 2.7.0, *WebSecurityConfigurerAdapter* is deprecated. We can rewrite the above basic auth configuration in the latest versions as follows:
+
+```
+@Configuration
+public class BasicAuthWebSecurityConfiguration
+{
+  @Autowired
+  private AppBasicAuthenticationEntryPoint authenticationEntryPoint;
+
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.authorizeRequests()
+        .antMatchers("/public").permitAll()
+        .anyRequest().authenticated()
+        .and()
+        .httpBasic()
+        .authenticationEntryPoint(authenticationEntryPoint);
+    return http.build();
+  }
+
+  @Bean
+  public InMemoryUserDetailsManager userDetailsService() {
+    UserDetails user = User
+        .withUsername("user")
+        .password(passwordEncoder().encode("password"))
+        .roles("USER_ROLE")
+        .build();
+    return new InMemoryUserDetailsManager(user);
+  }
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder(8);
+  }
+}
+```
+
+ 
+
+**3.Basic Authentication Demo**
+
+For demo purposes, we can write a simple REST API given below.
+
+EmployeeController.java
+
+`@RestController
+@RequestMapping(path = "/employees")
+public class EmployeeController
+{
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication().withUser("admin").password("admin").roles("USER");
+    private EmployeeDAO employeeDao;
+
+    @GetMapping(path="/", produces = "application/json")
+    public Employees getEmployees()
+    {
+        return employeeDao.getAllEmployees();
     }
-}
-  ```
-  
-  
-  4.Now let us define our authentication entry point.This class will be responsible to send response when the credentials are no longer authorized. If the authentication event was successful, or authentication was not attempted because the HTTP header did not contain a supported authentication request, the filter chain will continue as normal. The only time the filter chain will be interrupted is if authentication fails and the AuthenticationEntryPoint is called.
-  ```java
-  public class AuthenticationEntryPoint extends BasicAuthenticationEntryPoint {
-
-    @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authEx)
-            throws IOException {
-        response.addHeader("WWW-Authenticate", "Basic realm=" +getRealmName());
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        PrintWriter writer = response.getWriter();
-        writer.println("HTTP Status 401 - " + authEx.getMessage());
-    }
-
-    @Override
-    public void afterPropertiesSet()  {
-        setRealmName("DeveloperStack");
-        super.afterPropertiesSet();
-    }
-
-}
-  ```
-  
- 5.After a succesdfull authentication, Spring updates the security context with an authentication object that contains credentials, roles, principal etc.
-
- 6.Check API calls to validate Basic Authentication. If we open in browser it will ask for credencisals. If you use postman
- <img width="1095" alt="image" src="https://user-images.githubusercontent.com/20472904/232781385-6c57e140-8c0c-4b12-80c0-b783b9c03720.png">
-
-In that case we need pass creds 
-<img width="1095" alt="image" src="https://user-images.githubusercontent.com/20472904/232781928-331ad80e-4cc8-40f6-89ea-7651715c1184.png">
-
-
-  
-  Following logout implementation is one way to logout programatically.You can also configure logout in SpringSecurityConfig.java.You can use any one of them but not both.Once basic authentication is successfull, browser automatically sends basic auth header in every request following successfull authentication.Hence, if you are using this authentication mechanism in a browser based application, it is required to clear the Basic auth cache in the browser too after logout.
-  ```java
-  @RequestMapping(value="/logmeout", method = RequestMethod.POST)
-public String logoutPage (HttpServletRequest request, HttpServletResponse response) {
-Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-if (auth != null){
-new SecurityContextLogoutHandler().logout(request, response, auth);
-}
-return "redirect:/login";
-}
-  
-  ```
-  
-  
-  # REF.
-  https://www.devglan.com/spring-security/spring-boot-security-rest-basic-authentication
+}`
