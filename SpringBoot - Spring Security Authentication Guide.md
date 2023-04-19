@@ -55,8 +55,9 @@ Basic Authentication is a simple authentication scheme that sends the user's cre
 
 Basic authentification is a standard HTTP header with the user and password encoded in base64 : `Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`.The userName and password is encoded in the format `username:password`. This is one of the simplest technique to protect the REST resources because it does not require cookies. session identifiers or any login pages.
 
-**1. Maven Dependency**
-The simplest way to add all required jars is to add the *latest version of [spring-boot-starter-security](https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security)* dependency.
+**1. Maven Dependency**. 
+
+The simplest way to add all required jars is to add the *latest version of [spring-boot-starter-security](https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security)* dependency.
 
 ```
 <dependency>
@@ -66,8 +67,8 @@ The simplest way to add all required jars is to add the *latest version of [sp
 ```
 
 
-**2. Configure Spring Security**. 
-2\. Configure Spring Security
+**2. Configure Spring Security**.  
+
 To enable authentication and authorization support, we can configure the utility class *WebSecurityConfigurerAdapter* (*deprecated*). It helps in requiring the user to be authenticated prior to accessing any configured URL (or all URLs) within our application.
 
 In the following configuration, we are using *httpBasic()* which enables basic authentication. We are also configuring the in-memory authentication manager to supply a username and password.
@@ -139,13 +140,14 @@ public class BasicAuthWebSecurityConfiguration
 
  
 
-**3.Basic Authentication Demo**
+**3.Basic Authentication Demo**. 
 
 For demo purposes, we can write a simple REST API given below.
 
 EmployeeController.java
 
-`@RestController
+```
+@RestController
 @RequestMapping(path = "/employees")
 public class EmployeeController
 {
@@ -157,4 +159,5 @@ public class EmployeeController
     {
         return employeeDao.getAllEmployees();
     }
-}`
+}
+```
