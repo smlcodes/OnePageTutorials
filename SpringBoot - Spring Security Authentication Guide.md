@@ -249,3 +249,32 @@ System.out.println(new String(decodedByteArray));
 Output
 
 `username:password`
+
+
+ <br>
+
+# Basic Authentication - with Database & UserDetailsService
+
+A default implementation of the *AuthenticationProvider* uses the default implementations provided for the *UserDetailsService* and the *PasswordEncoder*.
+
+The default implementation of *UserDetailsService* only registers the default credentials in the memory of the application. These default credentials are `"user"` with a default password that's a randomly generated universally unique identifier (UUID) written to the application console when the spring context loads.
+
+```
+Using generated security password: 78nh23h-sd56-4b98-86ef-dfas8f8asf8
+```
+
+Note that *UserDetailsService* is always associated with a `PasswordEncoder` that encodes a supplied password and verifies if the password matches an existing encoding. When we replace the default implementation of the *UserDetailsService*, we must also specify a *PasswordEncoder*.
+
+In above example we have used In-memory UserDetailsService
+
+```
+  @Bean
+  public InMemoryUserDetailsManager userDetailsService() {
+    UserDetails user = User
+        .withUsername("user")
+        .password(passwordEncoder().encode("password"))
+        .roles("USER_ROLE")
+        .build();
+    return new InMemoryUserDetailsManager(user);
+  }
+ ```
