@@ -161,3 +161,61 @@ public class EmployeeController
     }
 }
 ```
+
+
+**Accessing the API without '*authorization*' Header**
+
+Access rest api at URL: *HTTP GET http://localhost:8080/employees/*
+![Require username and password](https://howtodoinjava.com/wp-content/uploads/2018/10/Require-username-and-password.png)
+
+Require username and password
+
+
+**With `authorization` Header**
+
+Upon passing authorization request header with encoded basic-auth user name and password combination, we will be able to access the rest api response.
+Access rest api at URL: *HTTP GET http://localhost:8080/employees/*
+
+![Successful api call](https://howtodoinjava.com/wp-content/uploads/2018/10/Successful-api-call.png)
+
+Successful api call
+
+
+### Generate Basic Auth Encoding
+Browser apI testing tools are able to generate the base-64 encoded token by themselves using the plain username and password. But if we need to generate the encoded token ourselves to pass the token programmatically, then we can use the following code that uses the [java.util.Base64]
+
+
+**1. Encoding a String to Base64**
+
+This is as simple as getting an instance of the Base64.Encoder and input the string as bytes to encode it.
+
+```
+Base64.Encoder encoder = Base64.getEncoder();
+String normalString = "username:password";
+
+String encodedString = encoder.encodeToString(
+        normalString.getBytes(StandardCharsets.UTF_8) );
+```
+
+Output
+
+`dXNlcm5hbWU6cGFzc3dvcmQ=`
+
+
+**2. Decoding a Base64 Encoded String**
+
+This is also very simple. Just get the instance of Base64.Decoder and use it to decode the base 64 encoded string.
+
+```
+String encodedString = "dXNlcm5hbWU6cGFzc3dvcmQ=";
+Base64.Decoder decoder = Base64.getDecoder();
+
+byte[] decodedByteArray = decoder.decode(encodedString);
+
+//Verify the decoded string
+System.out.println(new String(decodedByteArray));
+```
+
+Output
+
+`username:password`
