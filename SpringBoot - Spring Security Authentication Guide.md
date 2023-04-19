@@ -278,3 +278,66 @@ In above example we have used In-memory UserDetailsService
     return new InMemoryUserDetailsManager(user);
   }
  ```
+
+### Database-backed *UserDetailsService*
+To store and retrieve the username and passwords from a SQL database, we use `JdbcUserDetailsManager` class. It connects to the database directly through [JDBC]
+
+By default, it creates two tables in the database:
+-   *USERS*
+-   *AUTHORITIES*
+ 
+
+Note that the *JdbcUserDetailsManager* needs a *[DataSource](https://howtodoinjava.com/spring-boot2/datasource-configuration/)* to connect to the database so we need to define it as well.
+
+```
+@EnableWebSecurity
+public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
+
+  @Bean
+  public DataSource dataSource() {
+    return new EmbeddedDatabaseBuilder()
+      .setType(EmbeddedDatabaseType.H2)
+      .addScript(JdbcDaoImpl.DEFAULT_USER_SCHEMA_DDL_LOCATION)
+      .build();
+  }
+
+  @Bean
+  public UserDetailsService jdbcUserDetailsService(DataSource dataSource) {
+
+    UserDetails user = User
+      .withUsername("user")
+      .password("password")
+      .roles("USER_ROLE")
+      .build();
+
+    JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
+    users.createUser(user);
+    return users;
+  }
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return NoOpPasswordEncoder.getInstance();
+  }
+}
+```
+
+We can also write custom SQL queries to fetch the user and authorities' details if we are using a custom DDL schema that uses different table or column names.
+
+
+
+```
+@Bean
+public UserDetailsService jdbcUserDetailsService(DataSource dataSource) {
+  String usersByUsernameQuery = "select username, password, enabled from tbl_users where username = ?";
+  String authsByUserQuery = "select username, authority from tbl_authorities where username = ?";
+
+  JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
+
+  userDetailsManager.setUsersByUsernameQuery(usersByUsernameQuery);
+  userDetailsManager.setAuthoritiesByUsernameQuery(authsByUserQuery);
+
+  return users;
+}
+```
+ 
