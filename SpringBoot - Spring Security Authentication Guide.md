@@ -16,7 +16,7 @@ These are just some of the authentication types supported by Spring Boot. Depend
 
 # How Spring Security Works
 
-<img width="468" alt="image" src="https://user-images.githubusercontent.com/20472904/233010533-836764bd-303e-4591-9ae0-d1b5dd6d304b.png">
+<img width="900" alt="image" src="https://user-images.githubusercontent.com/20472904/233010533-836764bd-303e-4591-9ae0-d1b5dd6d304b.png">
 
 1.	When ever user request Rest API with username & password, request goes to Authentication Filter
 
