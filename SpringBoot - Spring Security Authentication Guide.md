@@ -15,7 +15,8 @@ These are just some of the authentication types supported by Spring Boot. Depend
 
 
 # How Spring Security Works
-<img width="900" alt="image" src="https://user-images.githubusercontent.com/20472904/233010533-836764bd-303e-4591-9ae0-d1b5dd6d304b.png">
+![image](https://user-images.githubusercontent.com/20472904/233063646-d0f3ceac-d894-4c62-93ed-5c658a2b20e6.png)
+
 1.	When ever user request Rest API with username & password, request goes to Authentication Filter
 
 2.	The **AuthenticationFilter** is a servlet filter class that will see if the user has already authenticated or not. If not, it will send that request to the **AuthenticationManager** to check if the details sent by the user is valid or not.
