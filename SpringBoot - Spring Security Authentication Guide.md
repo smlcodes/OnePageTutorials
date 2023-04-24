@@ -725,7 +725,7 @@ The main goal of the OAuth 2.0 flow is for the client to get a valid access toke
 
 ![image](https://user-images.githubusercontent.com/20472904/233937053-b9139395-db81-4b80-950e-06b799a626de.png)
 
-
+In our banking example, the protected resource (bank account) and authorization server would both be provided by the bank. It could be two different systems, or the same system with two different endpoints.
 
 
 
