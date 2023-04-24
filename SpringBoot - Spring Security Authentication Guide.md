@@ -812,7 +812,246 @@ Now open URL http://localhost:8181/springdemo/user/list, it will ask for login w
 
 # 7.  custom authentication provider for OAuth
 
+In Spring Boot, you can create a custom authentication provider for OAuth authentication by implementing the `OAuth2UserService` interface. The `OAuth2UserService` interface provides a method called `loadUser()`, which is responsible for loading the user details from the OAuth provider.
 
+Here are the steps to create a custom authentication provider for OAuth in Spring Boot:
+
+1.  Create a class that implements the `OAuth2UserService` interface.
+
+```
+@Service
+public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        // TODO: Implement your custom OAuth2 authentication logic here
+        return null;
+    }
+}`
+
+1.  Implement the `loadUser()` method to load the user details from the OAuth provider. This method should return an instance of `OAuth2User` that contains the user's details.
+
+2.  Annotate your class with `@Service` to make it a Spring-managed bean.
+
+3.  Register your custom authentication provider with Spring Security by creating a `WebSecurityConfigurerAdapter` configuration class and overriding the `configure()` method.
+
+
+
+```
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+            .authorizeRequests()
+                .anyRequest().authenticated()
+                .and()
+            .oauth2Login()
+                .userInfoEndpoint()
+                    .userService(customOAuth2UserService);
+    }
+}
+
+```
+
+In the `configure()` method, configure your application's security settings. In this example, we're requiring authentication for all requests and configuring the `OAuth2LoginConfigurer` to use our custom authentication provider.
+
+With these steps, you can create a custom authentication provider for OAuth in Spring Boot and use it to authenticate users in your application.
+
+
+
+# 8. Spring Security pre-authentication 
+Spring Security pre-authentication is a feature that allows applications to authenticate a user before the user is authenticated by the application's security mechanism. This means that the user's identity is already established by a third-party system, such as a Single Sign-On (SSO) solution or an authentication proxy, before the user's request reaches the application.
+
+In pre-authentication, the user's identity is typically passed to the application through a request header, such as "X-Remote-User" / "X-USERID". The application can then use this identity to authenticate the user and authorize their access to the application's resources.
+
+Spring Security provides support for pre-authentication through its `AbstractPreAuthenticatedProcessingFilter` class, which is a filter that intercepts the request and extracts the user's identity from the request header. The filter then passes the identity to Spring Security's authentication mechanism, which can authenticate the user based on the identity.
+
+Pre-authentication can simplify the authentication process for applications by removing the need for the user to enter their credentials. It can also improve security by allowing the user's identity to be authenticated by a trusted third-party system.
+
+In Spring Boot, you can implement pre-authentication using Spring Security by creating a custom filter that extracts the user's authentication information from the request header and passes it to Spring Security's authentication mechanism.
+
+Here are the steps to create a Spring Boot application with pre-authentication using Spring Security:
+
+1.  Create a class that extends `AbstractPreAuthenticatedProcessingFilter` and implements the `getPreAuthenticatedPrincipal()` and `getPreAuthenticatedCredentials()` methods. These methods extract the user's authentication information from the request header.
+
+javaCopy code
+
+`public class CustomPreAuthenticatedProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
+
+    @Override
+    protected Object getPreAuthenticatedPrincipal(HttpServletRequest request) {
+        return request.getHeader("X-USERID");
+    }
+
+    @Override
+    protected Object getPreAuthenticatedCredentials(HttpServletRequest request) {
+        return "N/A";
+    }
+}`
+
+1.  Annotate the class with `@Component` to make it a Spring-managed bean.
+
+2.  Register the custom filter with Spring Security by creating a `WebSecurityConfigurerAdapter` configuration class and overriding the `configure()` method.
+
+```
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private CustomPreAuthenticatedProcessingFilter customPreAuthenticatedProcessingFilter;
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+            .addFilter(customPreAuthenticatedProcessingFilter)
+            .authorizeRequests()
+                .anyRequest().authenticated()
+                .and()
+            .httpBasic().disable()
+            .csrf().disable();
+    }
+
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web
+            .ignoring()
+                .antMatchers("/actuator/**");
+    }
+}
+```
+
+
+1.  In the `configure()` method, configure your application's security settings. In this example, we're adding the custom filter to the security filter chain and requiring authentication for all requests.
+
+2.  Start your application and make a request with the user's authentication information in the request header. In this example, we're using the `X-USERID` header to pass the user's identity.
+
+bashCopy code
+
+`curl -H "X-USERID: alice" http://localhost:8080/`
+
+With these steps, you can implement pre-authentication using Spring Security in your Spring Boot application. When a user makes a request with their authentication information in the request header, the custom filter extracts the information and passes it to Spring Security's authentication mechanism, which can authenticate the user based on the identity.
+
+
+Sample of Realtime Implemetation
+```java
+/**
+ * Security configuration based on the Spring Security setup.
+ * <p>
+ * Since Micro-Services do not participate in authentication of users, and the authentication is delegated
+ * to an external Authentication Server, then this configuration wires the Pre-Authentication settings required 
+ * to extract the authenticated user token from the header.
+ * <p>
+ * By default, all APIs at path /api will be secured against the pre-authenticated header.
+ * 
+ * @author Ameer Qudsiyeh
+ */
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+	@Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		// Configure Security Policy
+		http			
+			.csrf().disable()	// CSRF does not apply in REST app //NOSONAR
+			.addFilterAfter(this.preAuthenticationFilter(), RequestHeaderAuthenticationFilter.class)
+			.authorizeRequests()
+				// Authenticate /api/** requests - Will use the RequestHeaderPreAuthenticationFilter
+				.antMatchers(RestConstants.API_BASE + "v*/**").hasAuthority(RestConstants.PREAUTH_USER_ROLE) //authenticated()
+			.and()
+				// REST API is stateless, hence no session. Caching will be used instead
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+			.and()
+				// For Pre-Authenticated setup use a 403 Forbidden entry point
+				.exceptionHandling()
+					.authenticationEntryPoint(new Http403ForbiddenEntryPoint())
+			.and()
+				.headers().frameOptions().disable();	// FrameOptions do not apply in REST app				
+		return http.build();
+	}
+
+    @Bean
+    protected AuthenticationManager authenticationManager() {
+        return new ProviderManager(Collections.singletonList(this.authenticationProvider()));
+    }
+
+	@Bean
+	public RequestHeaderAuthenticationFilter preAuthenticationFilter() {
+		RequestHeaderAuthenticationFilter preAuthenticationFilter = new RequestHeaderAuthenticationFilter();
+		preAuthenticationFilter.setPrincipalRequestHeader(RestConstants.PREAUTH_HEADER_LABEL);
+		preAuthenticationFilter.setCredentialsRequestHeader(RestConstants.PREAUTH_HEADER_LABEL);
+		preAuthenticationFilter.setAuthenticationManager(this.authenticationManager());
+		// Turn off exceptions since we have configured a 403 for the security policy
+		preAuthenticationFilter.setExceptionIfHeaderMissing(false);
+
+		return preAuthenticationFilter;
+	}
+
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        PreAuthenticatedAuthenticationProvider authenticationProvider = new PreAuthenticatedAuthenticationProvider();
+        authenticationProvider.setPreAuthenticatedUserDetailsService(this.userDetailsServiceWrapper());
+        // Turn off exceptions since we have configured a 403 for the security policy
+        authenticationProvider.setThrowExceptionWhenTokenRejected(false);
+
+        return authenticationProvider;
+    }
+
+    @Bean
+    public AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> userDetailsServiceWrapper() {
+        return new AuthorizationUserDetailsService();
+    }      
+}
+```
+
+
+
+
+```
+/**
+ * Spring Security UserDetails Service class for pre-authenticated requests.
+ * <p>
+ * Pre-authenticated requests inject a header token of the user id that has already been authenticated
+ * by an external Authentication Server.
+ * <p>
+ * This class is responsible for applying verification of the token and loading the associated user and 
+ * roles. No authentication is actually performed here
+ *
+ */
+@Slf4j
+public class AuthorizationUserDetailsService implements AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> {
+
+	/**
+	 * Load and return a UserDetails instance of the Pre-Autenticated user token.
+	 * <p>
+	 * Caching is enabled here since the Security Config is Stateless (SessionCreationPolicy.STATELESS),
+	 * then there is no session management, which can cause performance issues due to the creation of a
+	 * new Security Context for every request. 
+	 * <p>
+	 * NOTE: Ensure the caching configuration declares the Cache name of <b>PreAuthUsers</b>
+	 * 
+	 */
+	@Override
+	@Cacheable(value = "PreAuthUsers", key = "#token")
+	public UserDetails loadUserDetails(PreAuthenticatedAuthenticationToken token) throws UsernameNotFoundException {
+		String userId = token.getCredentials().toString();
+        log.debug("Detected Pre-Authenticated token for user: {}", userId);
+        
+        // Return a wrapped User object representing the pre-authenticated token.
+        // If no token, the Spring Security framework will throw an exception before arriving at this method
+		return new User(userId, userId, Collections.singletonList(new SimpleGrantedAuthority(RestConstants.PREAUTH_USER_ROLE)));
+	}
+
+}
+```
 
 
 # Ref.
