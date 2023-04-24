@@ -767,10 +767,24 @@ Dependencies
 
 
 
+1.Genetrate github API Keys by going https://github.com/settings/developers
 
+![image](https://user-images.githubusercontent.com/20472904/233954174-92ccda0c-f83a-4304-951d-52ba2422b684.png)
 
+<img width="897" alt="image" src="https://user-images.githubusercontent.com/20472904/233954551-c4e2df05-3c3c-47e0-967e-b11b4f7fc609.png">
+After the application has been created, note down the generated client id and client secret.
 
-
+Update Yaml file
+```
+spring:
+  security:
+   oauth2:
+     client:
+       registration:
+         github:
+           client-id: 01cbd1fd06e10fe0da41
+           client-secret: f116116a4cee00c46993d14859912XXXXXXXXX
+```
 
 
 
