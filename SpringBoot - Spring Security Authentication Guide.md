@@ -727,6 +727,24 @@ The main goal of the OAuth 2.0 flow is for the client to get a valid access toke
 
 In our banking example, the protected resource (bank account) and authorization server would both be provided by the bank. It could be two different systems, or the same system with two different endpoints.
 
+OAuth2 provides 4 different roles. 
+-   Resource Owner - The user of the application.
+-   Client - the application (user is using) which require access to user data on the resource server.
+-   Authorization Server - responsible for authenticating user's identity and gives an authorization token. This token is accepted by resource server and validate your identity.
+-   Resource Server - store user's data and http services which can return user data to authenticated clients.
+
+![image](https://user-images.githubusercontent.com/20472904/233951388-bff2eb82-0af4-4feb-8aab-67723af98298.png)
+
+
+### Access Token vs Refresh Token
+
+An access token is a string representing an authorization issued to the client. Tokens represent specific scopes and durations of access, granted by the resource owner, and enforced by the resource server and authorization server.
+
+The refresh token is issued (along with the access token) to the client by the authorization server, and it is used to obtain a new access token when the current access token becomes invalid or expires.
+
+ - The responsibility of access token is to access data before it gets expired.
+ - The responsibility of refresh token is to request for a new access token when the existing access token is expired.
+
 
 
 
