@@ -468,79 +468,114 @@ Using generated security password: 78nh23h-sd56-4b98-86ef-dfas8f8asf8
 
 Note that *UserDetailsService* is always associated with a `PasswordEncoder` that encodes a supplied password and verifies if the password matches an existing encoding. When we replace the default implementation of the *UserDetailsService*, we must also specify a *PasswordEncoder*.
 
-In above example we have used In-memory UserDetailsService
+### . UserDetailsService: Having access to the user's password
+
+Imagine you have a database table where you store your users. It has a couple of columns, but most importantly it has a username and password column, where you store the user's hashed(!) password.
 
 ```
-  @Bean
-  public InMemoryUserDetailsManager userDetailsService() {
-    UserDetails user = User
-        .withUsername("user")
-        .password(passwordEncoder().encode("password"))
-        .roles("USER_ROLE")
-        .build();
-    return new InMemoryUserDetailsManager(user);
-  }
- ```
-
-### Database-backed *UserDetailsService*
-To store and retrieve the username and passwords from a SQL database, we use `JdbcUserDetailsManager` class. It connects to the database directly through [JDBC]
-
-By default, it creates two tables in the database:
--   *USERS*
--   *AUTHORITIES*
- 
-
-Note that the *JdbcUserDetailsManager* needs a *[DataSource](https://howtodoinjava.com/spring-boot2/datasource-configuration/)* to connect to the database so we need to define it as well.
-
-```
-@EnableWebSecurity
-public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
-
-  @Bean
-  public DataSource dataSource() {
-    return new EmbeddedDatabaseBuilder()
-      .setType(EmbeddedDatabaseType.H2)
-      .addScript(JdbcDaoImpl.DEFAULT_USER_SCHEMA_DDL_LOCATION)
-      .build();
-  }
-
-  @Bean
-  public UserDetailsService jdbcUserDetailsService(DataSource dataSource) {
-
-    UserDetails user = User
-      .withUsername("user")
-      .password("password")
-      .roles("USER_ROLE")
-      .build();
-
-    JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
-    users.createUser(user);
-    return users;
-  }
-
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return NoOpPasswordEncoder.getInstance();
-  }
-}
+create table users (id int auto_increment primary key, username varchar(255), password varchar(255));
 ```
 
-We can also write custom SQL queries to fetch the user and authorities' details if we are using a custom DDL schema that uses different table or column names.
+In this case Spring Security needs you to define two beans to get authentication up and running.
 
+1.  A UserDetailsService.
 
+2.  A PasswordEncoder.
+
+Specifying a UserDetailsService is as simple as this:
 
 ```
 @Bean
-public UserDetailsService jdbcUserDetailsService(DataSource dataSource) {
-  String usersByUsernameQuery = "select username, password, enabled from tbl_users where username = ?";
-  String authsByUserQuery = "select username, authority from tbl_authorities where username = ?";
-
-  JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
-
-  userDetailsManager.setUsersByUsernameQuery(usersByUsernameQuery);
-  userDetailsManager.setAuthoritiesByUsernameQuery(authsByUserQuery);
-
-  return users;
+public UserDetailsService userDetailsService() {
+    return new MyDatabaseUserDetailsService(); // (1)
 }
 ```
- 
+
+MyDatabaseUserDetailsService implements UserDetailsService, a very simple interface, which consists of one method returning a UserDetails object:
+
+```
+public class MyDatabaseUserDetailsService implements UserDetailsService {
+
+	UserDetails loadUserByUsername(String username) throws UsernameNotFoundException { // (1)
+         // 1. Load the user from the users table by username. If not found, throw UsernameNotFoundException.
+         // 2. Convert/wrap the user to a UserDetails object and return it.
+        return someUserDetails;
+    }
+}
+
+public interface UserDetails extends Serializable { // (2)
+
+    String getUsername();
+
+    String getPassword();
+
+    // <3> more methods:
+    // isAccountNonExpired,isAccountNonLocked,
+    // isCredentialsNonExpired,isEnabled
+}
+```
+
+1.  A UserDetailsService loads UserDetails via the user's username. Note that the method takes only one parameter: username (not the password).
+
+2.  The UserDetails interface has methods to get the (hashed!) password and one to get the username.
+
+3.  UserDetails has even more methods, like is the account active or blocked, have the credentials expired or what permissions the user has - but we won't cover them here.
+
+So you can either implement these interfaces yourself, like we did above, or use existing ones that Spring Security provides.
+
+
+
+You can always implement the UserDetailsService and UserDetails interfaces yourself. But, you'll also find defualt implementations by Spring Security that you can use/configure/extend/override instead.
+
+1.  **JdbcUserDetailsManager**, which is a JDBC(database)-based UserDetailsService. You can configure it to match your *user* table/column structure.
+
+2.  **InMemoryUserDetailsManager**, which keeps all userdetails in-memory and is great for testing.
+
+3.  **org.springframework.security.core.userdetail.User**, which is a sensible, default UserDetails implementation that you could use. That would mean potentially mapping/copying between your entities/database tables and this user class. Alternatively, you could simply make your entities implement the UserDetails interface.
+
+
+
+#### Full UserDetails Workflow: HTTP Basic Authentication
+
+Now think back to your HTTP Basic Authentication, that means you are securing your application with Spring Security and Basic Auth. This is what happens when you specify a UserDetailsService and try to login:
+
+1.  Extract the username/password combination from the HTTP Basic Auth header in a filter. You don't have to do anything for that, it will happen under the hood.
+
+2.  Call your **MyDatabaseUserDetailsService** to load the corresponding user from the database, wrapped as a UserDetails object, which exposes the user's hashed password.
+
+3.  Take the extracted password from the HTTP Basic Auth header, hash it automatically and **compare** it with the hashed password from your UserDetails object. **If both match, the user is successfully authenticated**.
+
+That's all there is to it. But hold on, how does Spring Security hash the password from the client (step 3)? With what algorithm?
+
+#### PasswordEncoders
+
+Spring Security cannot magically guess your preferred password hashing algorithm. That's why you need to specify another @Bean, a **PasswordEncoder**. If you want to, say, use the BCrypt password hashing function (Spring Security's default) for all your passwords, you would specify this @Bean in your SecurityConfig.
+
+```
+@Bean
+public BCryptPasswordEncoder bCryptPasswordEncoder() {
+    return new BCryptPasswordEncoder();
+}
+```
+
+What if you have multiple password hashing algorithms, like Bcrypt or SHA-256? Then you would use the following encoder:
+
+```
+@Bean
+public PasswordEncoder passwordEncoder() {
+    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+}
+```
+**DelegatingPasswordEncoder** will look at the UserDetail’s hashed password, which now has to start with a **{prefix}**. That prefix, is your hashing method! Your database table would then look like this:
+<img width="897" alt="image" src="https://user-images.githubusercontent.com/20472904/233930084-006a9bb1-b869-4ad9-9c05-6fade65737e7.png">
+
+Spring Security will:
+
+1.  Read in those passwords and strip off the prefix ( {bcrypt} or {sha256} ).
+
+2.  Depending on the prefix value, use the correct PasswordEncoder (i.e. a BCryptEncoder, or a SHA256Encoder)
+
+3.  Hash the incoming, raw password with that PasswordEncoder and compare it with the stored one.
+
+That's all there is to PasswordEncoders.
+
