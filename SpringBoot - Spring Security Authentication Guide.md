@@ -748,6 +748,22 @@ The refresh token is issued (along with the access token) to the client by the
 
 
 
+# OAuth2 with Github
+
+![image](https://user-images.githubusercontent.com/20472904/233953636-4dad9283-5f54-45c1-871f-b7a2ca7a55b9.png)
+
+Dependencies
+```
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
+		</dependency>
+```	 
 
 
 
@@ -765,3 +781,5 @@ https://www.marcobehler.com/guides/spring-security#_authentication_with_spring_s
 https://www.marcobehler.com/guides/spring-security-oauth2
 
 https://howtodoinjava.com/spring-boot2/oauth2-auth-server/
+
+https://howtodoinjava.com/spring-security/oauth2-login-with-spring-boot-security/
