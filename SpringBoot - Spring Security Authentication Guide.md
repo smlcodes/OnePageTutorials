@@ -121,6 +121,9 @@ If you expand that one line into a list, it looks like Spring Security does not 
 So, when an HTTPRequest comes in, it will go through *all* these 15 filters, before your request finally hits your @RestControllers. The order is important, too, starting at the top of that list and going down to the bottom.
 ![image](https://user-images.githubusercontent.com/20472904/233918357-ce61ee28-e80b-48a0-8488-66feec40e9d5.png)
 
+So with these couple of filters, Spring Security provides you a login/logout page, as well as the ability to login with Basic Auth or Form Logins, as well as a couple of additional goodies like the CsrfFilter.Those filters, for a large part, are Spring Security. Hence, we need to have a look at how to configure Spring Security, next.
+
+
 
 # 1.Basic Authentication
 
