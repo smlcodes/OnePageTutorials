@@ -197,8 +197,8 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 }
 ```
 
-3. **Configure Authentication**: With the *WebSecurityConfigureAdapter, *we'll use an *AuthenticationManagerBuilder* to set our authentication context.
-Now, if we want to avoid deprecation, we can define a *UserDetailsManager* or *UserDetailsService *component:
+3. **Configure Authentication**: in older we'll use an AuthenticationManagerBuilder to set our authentication context.
+Now, if we want to avoid deprecation, we can define a UserDetailsManager or UserDetailsService component:
 
 ```
 @Bean
