@@ -702,6 +702,42 @@ public class WebSecurityConfig {
 
 # 5. Spring Security & OAuth 2.0
 
+## Welcome to world of OAuth
+
+**Imagine you have a bank account, and you want to give a 3rd party access to CRED app, which tries to categorize and report on your monthly spendings.I.e. allow it to read your banking transactions, but not allow it to create new transactions**
+
+Rephrasing the problem above in OAuth speak looks like this:
+
+*How can the resource owner (you) give a client (3rd party software) scoped access (read or write or both) to a protected resource (bank account)?*
+
+Let's break this down.
+
+-   The `*resource owner*` is you, the user, who holds the rights to *something*.
+
+-   That *something* is called `*protected resource*`, i.e. your bank account.
+
+-   The 3rd party application, who wants to access the `*protected resource*` in your place, is called the `*client*`. Never confuse the `*client*` with the `*resource owner*`.
+
+-   (Additionally, the client only gets `*scoped*` access, i.e. it can only read transactions in this example)
+
+These are three main players of every OAuth interaction.
+The main goal of the OAuth 2.0 flow is for the client to get a valid access token.
+
+![image](https://user-images.githubusercontent.com/20472904/233937053-b9139395-db81-4b80-950e-06b799a626de.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Ref.
