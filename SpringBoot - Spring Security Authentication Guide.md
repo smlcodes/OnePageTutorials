@@ -46,8 +46,80 @@ The AuthenticationFilter will use a AuthenticationSuccessHandler and stores that
  
 
 
+## Going Deep...
+Create a Sample SpringBoot Project & add Maven Dependency.
+```
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+```
 
 
+So you go along, add Spring Security to your Spring Boot (or plain [Spring](https://www.marcobehler.com/guides/spring-framework)) project and suddenly...
+
+-   you have auto-generated login-pages.
+
+-   you cannot execute POST requests anymore.
+
+-   your whole application is on lockdown and prompts you to enter a username and password.
+
+The short answer:
+
+At its core, Spring Security is really just a bunch of servlet filters that help you add [authentication] and [authorization] to your web application.
+
+It also integrates well with frameworks like Spring Web MVC (or [Spring Boot](https://www.marcobehler.com/guides/spring-boot)), as well as with standards like OAuth2 or SAML. And it auto-generates login/logout pages and protects against common exploits like CSRF.
+
+
+### 1. Authentication
+
+First off, if you are running a typical (web) application, you need your users to *authenticate*. That means your application needs to verify if the user is *who* he claims to be, typically done with a username and password check.
+
+### 2. Authorization
+Most applications have the concept of permissions (or roles). Imagine: customers who have access to the public-facing frontend of your webshop, and administrators who have access to a separate admin area.
+
+
+### 3. Servlet Filters
+
+Last but not least, let's have a look at Servlet Filters
+
+Basically any Spring web application is *just* one servlet: Spring's good old [DispatcherServlet](https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-servlet), that redirects incoming HTTP requests (e.g. from a browser) to your **@Controllers** or **@RestControllers**.
+
+The thing is: There is no security hardcoded into that DispatcherServlet and you also very likely don't want to fumble around with a raw HTTP Basic Auth header in your @Controllers. Optimally, the authentication and authorization should be done *before* a request hits your @Controllers.
+
+Luckily, there's a way to do exactly this in the Java web world: you can put [filters](https://www.oracle.com/technetwork/java/filters-137243.html) *in front* of servlets, which means you could think about writing a SecurityFilter and configure it in your Tomcat (servlet container/application server) to filter every incoming HTTP request before it hits your servlet.
+
+![image](https://user-images.githubusercontent.com/20472904/233917882-80261ca8-b688-40b1-b207-33dd94ffb8ee.png)
+
+In the real-world, however, you would split this one filter up into *multiple* filters, that you then *chain* together.
+
+For example, an incoming HTTP request would...​
+
+1.  First, go through a LoginMethodFilter...​
+
+2.  Then, go through an AuthenticationFilter...​
+
+3.  Then, go through an AuthorizationFilter...​
+
+4.  Finally, hit your servlet.
+
+This concept is called *FilterChain* and the last method call in your filter above is actually delegating to that very chain:
+
+```
+chain.doFilter(request, response);
+```
+
+
+Let's assume you [set up Spring Security] correctly and then boot up your web application. You'll see the following log message:
+
+```
+2020-02-25 10:24:27.875  INFO 11116 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@46320c9a, org.springframework.security.web.context.SecurityContextPersistenceFilter@4d98e41b, org.springframework.security.web.header.HeaderWriterFilter@52bd9a27, org.springframework.security.web.csrf.CsrfFilter@51c65a43, org.springframework.security.web.authentication.logout.LogoutFilter@124d26ba, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@61e86192, org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@10980560, org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@32256e68, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@52d0f583, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@5696c927, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@5f025000, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5e7abaf7, org.springframework.security.web.session.SessionManagementFilter@681c0ae6, org.springframework.security.web.access.ExceptionTranslationFilter@15639d09, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@4f7be6c8]|
+```
+
+If you expand that one line into a list, it looks like Spring Security does not just install *one* filter, instead it installs a whole filter chain consisting of 15 (!) different filters.
+
+So, when an HTTPRequest comes in, it will go through *all* these 15 filters, before your request finally hits your @RestControllers. The order is important, too, starting at the top of that list and going down to the bottom.
+![image](https://user-images.githubusercontent.com/20472904/233918357-ce61ee28-e80b-48a0-8488-66feec40e9d5.png)
 
 
 # 1.Basic Authentication
