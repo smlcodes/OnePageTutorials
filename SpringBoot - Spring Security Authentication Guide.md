@@ -124,6 +124,121 @@ So, when an HTTPRequest comes in, it will go through *all* these 15 filters, b
 So with these couple of filters, Spring Security provides you a login/logout page, as well as the ability to login with Basic Auth or Form Logins, as well as a couple of additional goodies like the CsrfFilter.Those filters, for a large part, are Spring Security. Hence, we need to have a look at how to configure Spring Security, next.
 
 
+### How to configure Spring Security: WebSecurityConfigurerAdapter (v2.7.0 VS latest)
+In versions prior to Spring Boot 2.7.0, we needed to write a configuration class to inherit WebSecurityConfigurerAdapter, and then rewrite the three methods in the Adapter for configuration.
+
+```
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter
+{
+    @Override
+    protected void configure(HttpSecurity http) throws Exception
+    {
+        http
+         .csrf().disable()
+         .authorizeRequests().anyRequest().authenticated()
+         .and()
+         .httpBasic();
+    }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth)
+            throws Exception
+    {
+        auth.inMemoryAuthentication()
+        	.withUser("admin")
+        	.password("{noop}password")
+        	.roles("ROLE_USER");
+    }
+}
+```
+
+The new usage is very simple, no need to inherit WebSecurityConfigurerAdapter, just declare the configuration class directly. Do below changes
+
+1. First, we'll define our configuration class:
+
+```
+@EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
+public class SecurityConfig {
+
+    // config
+
+}
+```
+
+
+2.we can create a **SecurityFilterChain** bean, in place of configure(Http ) method
+
+```
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.csrf()
+      .disable()
+      .authorizeRequests()
+      .antMatchers(HttpMethod.DELETE)
+      .hasRole("ADMIN")
+      .antMatchers("/admin/**")
+      .hasAnyRole("ADMIN")
+      .antMatchers("/user/**")
+      .hasAnyRole("USER", "ADMIN")
+      .antMatchers("/login/**")
+      .anonymous()
+      .anyRequest()
+      .authenticated()
+      .and()
+      .httpBasic()
+      .and()
+      .sessionManagement()
+      .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+    return http.build();
+}
+```
+
+3. **Configure Authentication**: With the *WebSecurityConfigureAdapter, *we'll use an *AuthenticationManagerBuilder* to set our authentication context.
+Now, if we want to avoid deprecation, we can define a *UserDetailsManager* or *UserDetailsService *component:
+
+```
+@Bean
+public UserDetailsService userDetailsService(BCryptPasswordEncoder bCryptPasswordEncoder) {
+    InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+    manager.createUser(User.withUsername("user")
+      .password(bCryptPasswordEncoder.encode("userPass"))
+      .roles("USER")
+      .build());
+    manager.createUser(User.withUsername("admin")
+      .password(bCryptPasswordEncoder.encode("adminPass"))
+      .roles("USER", "ADMIN")
+      .build());
+    return manager;
+}
+```
+
+Or, given our *UserDetailService*, we can even set an *AuthenticationManager*:
+
+
+``` 
+@Bean
+public AuthenticationManager authenticationManager(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder, UserDetailService userDetailService)
+  throws Exception {
+    return http.getSharedObject(AuthenticationManagerBuilder.class)
+      .userDetailsService(userDetailsService)
+      .passwordEncoder(bCryptPasswordEncoder)
+      .and()
+      .build();
+}
+
+```
+Similarly, this will work if we use JDBC or LDAP authentication.
+
+# Authentication Types
+
+
+
+
+
 
 # 1.Basic Authentication
 
