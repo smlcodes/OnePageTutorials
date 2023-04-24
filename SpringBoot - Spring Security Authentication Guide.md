@@ -621,10 +621,82 @@ public class AtlassianCrowdAuthenticationProvider implements AuthenticationProvi
 
 
 
+# 4. Authorization with Spring Security
+
+So far, we have only talked about authentication, e.g. username and password checks.
+
+Let’s now have a look at permissions, or rather roles and authorities in Spring Security 
+
+### What are Authorities? What are Roles?
+
+Simple:
+
+-   An authority (in its simplest form) is just a string, it can be anything like: user, ADMIN, ROLE_ADMIN or 53cr37_r0l3.
+
+-   A role is an authority with a `*ROLE_*` prefix. So a role called `*ADMIN*` is the same as an authority called `*ROLE_ADMIN*`.
+
+The distinction between roles and authorities is purely conceptual and something that often bewilders people new to Spring Security.
 
 
+### What are GrantedAuthorities? What are SimpleGrantedAuthorities?
 
+Of course, Spring Security doesn't let you get away with just using Strings. There's a Java class representing your authority String, a popular one being **SimpleGrantedAuthority**.
 
+```
+public final class SimpleGrantedAuthority implements GrantedAuthority {
+
+	private final String role;
+
+    @Override
+	public String getAuthority() {
+		return role;
+	}
+}
+```
+
+ We are storing the users in  Users table.Now, you would simply add a column called "authorities" to it.adding could contain multiple, comma-separated values authorities. 
+ 
+Adjust your UserDetailsService to read in that authorities column.
+
+```
+public class MyDatabaseUserDetailsService implements UserDetailsService {
+
+  UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+     User user = userDao.findByUsername(username);
+     List<SimpleGrantedAuthority> grantedAuthorities = user.getAuthorities().map(authority -> new SimpleGrantedAuthority(authority)).collect(Collectors.toList()); // (1)
+     return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), grantedAuthorities); // (2)
+  }
+
+}
+```
+
+Revisiting WebSecurityConfigurerAdapter for Authorities
+
+```
+@Configuration
+@EnableWebSecurity
+public class WebSecurityConfig {
+
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+          .authorizeRequests()
+            .antMatchers("/admin").hasAuthority("ROLE_ADMIN") // (1)
+            .antMatchers("/callcenter").hasAnyAuthority("ROLE_ADMIN", "ROLE_CALLCENTER") // (2)
+            .anyRequest().authenticated() // (3)
+            .and()
+         .formLogin()
+           .and()
+         .httpBasic();
+	}
+}
+```
+
+1.  To access the `*/admin*` area you (i.e. the user) need to be authenticated *AND* have the authority (a simple string) ROLE_ADMIN.
+
+2.  To access the `*/callcenter*` area you need to be authenticated *AND* have either the authority ROLE_ADMIN *OR* ROLE_CALLCENTER.
+
+3.  For any other request, you do not need a specific role but still need to be authenticated.
 
 
 
