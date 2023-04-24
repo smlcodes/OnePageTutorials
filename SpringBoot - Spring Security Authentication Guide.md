@@ -748,7 +748,7 @@ The refresh token is issued (along with the access token) to the client by the
 
 
 
-# OAuth2 with Github
+# 6. OAuth2 with Github
 
 ![image](https://user-images.githubusercontent.com/20472904/233953636-4dad9283-5f54-45c1-871f-b7a2ca7a55b9.png)
 
@@ -805,6 +805,13 @@ Update SecurityConfig with oauth2Login() method. The oauth2Login() method adds t
 
 Now open URL http://localhost:8181/springdemo/user/list, it will ask for login with Github like below
 <img src="https://user-images.githubusercontent.com/20472904/233961798-3e840aa8-d7f5-4ace-b76b-cce3c8f10952.png">
+
+
+
+
+
+# 7.  custom authentication provider for OAuth
+
 
 
 
