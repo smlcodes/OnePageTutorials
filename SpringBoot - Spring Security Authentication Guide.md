@@ -391,11 +391,6 @@ public class EmployeeController
 }
 ```
 
-# Ref.
-I have gone through below articles while writing this post. So this post not completly wrote by me. 
-https://www.marcobehler.com/guides/spring-security#_authentication_with_spring_security
-
-
 **Accessing the API without '*authorization*' Header**
 
 Access rest api at URL: *HTTP GET http://localhost:8080/employees/*
@@ -578,4 +573,23 @@ Spring Security will:
 3.  Hash the incoming, raw password with that PasswordEncoder and compare it with the stored one.
 
 That's all there is to PasswordEncoders.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Ref.
+I have gone through below articles while writing this post. So this post not completly wrote by me. 
+https://www.marcobehler.com/guides/spring-security#_authentication_with_spring_security
+
 
