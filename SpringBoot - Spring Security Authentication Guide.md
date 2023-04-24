@@ -700,8 +700,12 @@ public class WebSecurityConfig {
 
 
 
+# 5. Spring Security & OAuth 2.0
+
+
+
 # Ref.
 I have gone through below articles while writing this post. So this post not completly wrote by me. 
 https://www.marcobehler.com/guides/spring-security#_authentication_with_spring_security
 
-
+https://www.marcobehler.com/guides/spring-security-oauth2
