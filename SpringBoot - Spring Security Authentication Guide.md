@@ -786,6 +786,26 @@ spring:
            client-secret: f116116a4cee00c46993d14859912XXXXXXXXX
 ```
 
+Update SecurityConfig with oauth2Login() method. The oauth2Login() method adds the OAuth2LoginAuthenticationFilter to the filter chain that intercepts the request and applies OAuth 2 authentication logic.
+
+```
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http.cors().and().csrf().disable().authorizeRequests()
+                .antMatchers("/swagger/*").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .oauth2Login();
+        return http.build();
+    }
+
+```
+
+
+Now open URL http://localhost:8181/springdemo/user/list, it will ask for login with Github like below
+<img src="https://user-images.githubusercontent.com/20472904/233961798-3e840aa8-d7f5-4ace-b76b-cce3c8f10952.png">
+
 
 
 # Ref.
