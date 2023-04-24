@@ -233,9 +233,18 @@ public AuthenticationManager authenticationManager(HttpSecurity http, BCryptPass
 ```
 Similarly, this will work if we use JDBC or LDAP authentication.
 
+
 # Authentication Types
 
+When it comes to authentication and Spring Security you have roughly three scenarios:
 
+1.  The default: You *can* access the (hashed) password of the user, because you have his details (username, password) saved in e.g. a InMenory, Basic, database table.
+
+2.  Less common: You *cannot* access the (hashed) password of the user. This is the case if your users and passwords are stored *somewhere* else, like in a 3rd party identity management product offering REST services for authentication. Think: [Atlassian Crowd](https://www.atlassian.com/software/crowd).
+
+3.  Also popular: You want to use OAuth2 or "Login with Google/Twitter/etc." (OpenID), likely in combination with JWT. Then none of the following applies and you should go straight to the [OAuth2 chapter].
+
+Note: Depending on your scenario, you need to specify different @Beans to get Spring Security working, otherwise you'll end up getting pretty confusing exceptions (like a NullPointerException if you forgot to specify the PasswordEncoder). Keep that in mind
 
 
 
