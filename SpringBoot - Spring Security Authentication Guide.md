@@ -763,3 +763,5 @@ I have gone through below articles while writing this post. So this post not com
 https://www.marcobehler.com/guides/spring-security#_authentication_with_spring_security
 
 https://www.marcobehler.com/guides/spring-security-oauth2
+
+https://howtodoinjava.com/spring-boot2/oauth2-auth-server/
