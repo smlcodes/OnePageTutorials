@@ -827,7 +827,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         // TODO: Implement your custom OAuth2 authentication logic here
         return null;
     }
-}`
+}
+```
 
 1.  Implement the `loadUser()` method to load the user details from the OAuth provider. This method should return an instance of `OAuth2User` that contains the user's details.
 
@@ -880,9 +881,9 @@ Here are the steps to create a Spring Boot application with pre-authentication u
 
 1.  Create a class that extends `AbstractPreAuthenticatedProcessingFilter` and implements the `getPreAuthenticatedPrincipal()` and `getPreAuthenticatedCredentials()` methods. These methods extract the user's authentication information from the request header.
 
-javaCopy code
 
-`public class CustomPreAuthenticatedProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
+```
+public class CustomPreAuthenticatedProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
 
     @Override
     protected Object getPreAuthenticatedPrincipal(HttpServletRequest request) {
@@ -893,7 +894,8 @@ javaCopy code
     protected Object getPreAuthenticatedCredentials(HttpServletRequest request) {
         return "N/A";
     }
-}`
+}
+```
 
 1.  Annotate the class with `@Component` to make it a Spring-managed bean.
 
