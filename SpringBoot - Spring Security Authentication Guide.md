@@ -575,8 +575,48 @@ Spring Security will:
 That's all there is to PasswordEncoders.
 
 
+# 3. Third Party Authenticatio Provider
 
+Now, imagine that you are using [Atlassian Crowd](https://www.atlassian.com/software/crowd) for centralized identity management. That means all your users and passwords for all your applications are stored in Atlassian Crowd and not in your database table anymore.
 
+Here, You do not have the user passwords anymore in your application, you have a REST API that you can login against, with your username and password. (A POST request to the `*/rest/usermanagement/1/authentication*` REST endpoint).
+
+If that is the case, you cannot use a UserDetailsService anymore, instead you need to implement and provide an **AuthenticationProvider** @Bean.
+
+```
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        return new AtlassianCrowdAuthenticationProvider();
+    }
+```
+
+An AuthenticationProvider consists primarily of one method and a naive implementation could look like this:
+
+```
+public class AtlassianCrowdAuthenticationProvider implements AuthenticationProvider {
+
+        Authentication authenticate(Authentication authentication)  // (1)
+                throws AuthenticationException {
+            String username = authentication.getPrincipal().toString(); // (1)
+            String password = authentication.getCredentials().toString(); // (1)
+
+            User user = callAtlassianCrowdRestService(username, password); // (2)
+            if (user == null) {                                     // (3)
+                throw new AuthenticationException("could not login");
+            }
+            return new UserNamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities()); // (4)
+        }
+	    // other method ignored
+}
+```
+
+1.  Compared to the UserDetails load() method, where you only had access to the username, you now have access to the complete authentication attempt, *usually* containing a username and password.
+
+2.  You can do whatever you want to authenticate the user, e.g. call a REST-service.
+
+3.  If authentication failed, you need to throw an exception.
+
+4.  If authentication succeeded, you need to return a fully initialized **UsernamePasswordAuthenticationToken**. It is an implementation of the Authentication interface and needs to have the field authenticated be set to true (which the constructor used above will automatically set). We'll cover authorities in the next chapter.
 
 
 
