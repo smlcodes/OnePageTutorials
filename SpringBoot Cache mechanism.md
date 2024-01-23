@@ -100,7 +100,7 @@ When the caching is enabled then the application first looks for required object
 
 ## Spring Boot Caching Annotations
 
-1. `@EnableCaching` (Class Level)
+1.`@EnableCaching` (Class Level)
 It is a class level annotation. It is used to enable caching in spring boot application. By default it setup a CacheManager and creates in-memory cache using ConcurrentHashMap.
 
 We can specify this in SpringBoot main Application class & Configuration class
@@ -122,9 +122,10 @@ public class CacheConfig {
 
 }
 ```
+
  
 
-2. `@Cacheable`
+2.`@Cacheable`
 Cacheable  annotation is used to mark a method as cacheable. When a method is called, its result is stored in the memory cache. Subsequent invocations of the method with the same provided arguments will retrieve the cached result instead of invoking the method again.
 ```java 
 @Cacheable(“employees”)
@@ -137,15 +138,16 @@ public Employee findById(int id) {
 
 
 
-3.` @CachePut`
+3.`@CachePut`
 It is a method level annotation. It is used to update the cache before invoking the method.
 
 
-4. `@CacheEvict`
+
+4.`@CacheEvict`
 It is a method level annotation. It is used to remove the data from the cache.
 
 
-5. `@Caching `
+5.`@Caching `
 Let’s say you have a scenario where you want to use multiple annotations of the same type for caching a method. @Caching annotations allow you to use group multiple cache-related annotations together. 
 ```java 
 @Caching(evict = {
@@ -159,7 +161,7 @@ public Employee getEmployee(Employee employee) {
 
 
 
-6. `@CacheConfig`
+6.`@CacheConfig`
 It is a class level annotation. It is used to share common properties such as cache name, cache manager to all methods annotated with cache annotations.
 
 When a class is declared with this annotation then it provides default setting for any cache operation defined in that class. Using this annotation, we do need to declare things multiple times.
