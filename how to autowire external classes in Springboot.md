@@ -13,3 +13,7 @@ public class MailerConfig {
     }
 }
 ```
+
+
+
+If MailerClient is an interface, you'll need to provide an implementation for it. Here's how you can modify the configuration to use an implementation of the MailerClient interface:
