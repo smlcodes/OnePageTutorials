@@ -1,0 +1,1 @@
+Folder contains .mp3 songs. write powershell script which iterates over the songs, identity the alubm &  and creates a folder with album name then move all songs related to that alubm into album folder
