@@ -27,3 +27,15 @@ foreach ($file in $mp3Files) {
 
 
 ```
+
+
+
+### Running Script
+
+- Open a text editor like Notepad.
+- Copy and paste the script into the text editor.
+- Save the file with a ".ps1" extension, for example, "organize_music.ps1".
+- Open PowerShell.
+- Navigate to the directory where the script is saved using the cd command. For example:
+`.\organize_music.ps1`
+
